@@ -21,3 +21,7 @@ LLMAudit.py is a class that connects to the LMStudio local LLM API to perform LL
 2. Review Vulnerable And Report Node (Reviewer Node)
 
 
+## gui.py
+gui.py is a simple GUI program built with PyQt that enables all these functionalities to operate through a graphical user interface.
+
+
