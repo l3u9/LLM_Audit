@@ -59,11 +59,13 @@ class LLMAuditor:
                 formatted += "\n\nFunction Code: \n"
                 formatted += "\n".join(value[0])
 
-                formatted += f"\n\n#### Dependent Function {i+1}\n\n"
-                formatted += f"Contract Name: {key}\n\n"
-                for val in value[1:]:
-                    formatted += "\n\nFunction Code: \n"
-                    formatted += "\n".join(val)
+                if len(value) > 1:
+                    formatted += f"\n\n#### Dependent Function {i+1}\n\n"
+                    formatted += f"Contract Name: {key}\n\n"
+                    for val in value[1:]:
+                        formatted += "\n\nFunction Code: \n"
+                        formatted += "\n".join(val)
+
             else:
                 formatted += f"\n\n#### Dependent Function {i+1}\n\n"
                 formatted += f"Contract Name: {key}\n\n"

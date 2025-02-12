@@ -200,7 +200,11 @@ class SmartContractAnalyzer(QWidget):
                 review = self.client.analyze_and_review(contract_name, function_name, depth, check_impact=check_impact)
 
                 if review:
-                    save_review_report(contract_name, function_name, review, self.save_path)
+                    report_path = save_review_report(contract_name, function_name, review, self.save_path)
+                    if report_path:
+                        print(f"✅ Report saved at: {report_path}")
+                else:
+                    review = "✅ No vulnerabilities found."
 
                 result_text += f"📑 Contract: {contract_name}, Function: {function_name}\n{review}\n{'-' * 50}\n"
 
