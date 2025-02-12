@@ -186,7 +186,7 @@ class SmartContractAnalyzer(QWidget):
             self.result_text.setText(f"📑 Contract: {contract_name}, Function: {function_name}\n\n{review}")
             report_path = save_review_report(contract_name, function_name, review, self.save_path)
             if report_path:
-
+                print(f"✅ Report saved at: {report_path}")
         else:
             self.result_text.setText("✅ No vulnerabilities found.")
 
