@@ -1,6 +1,7 @@
 from ContractManager import *
 from collections import OrderedDict
 from copy import deepcopy
+import string
 
 class Tracer:
     def __init__(self, contract_manager):
@@ -87,7 +88,6 @@ class Tracer:
 
     def trace_function(self, contract_name, function_name):
 
-        os.system("echo 'contract_name: " + contract_name + "'" + " > ./test3.txt")
         internal_calls = self.contract_manager.get_functions_internal_calls(contract_name, function_name)
         external_calls = self.contract_manager.get_functions_external_calls(contract_name, function_name)
         view_pure_calls = self.contract_manager.get_functions_view_pure_calls(contract_name, function_name)
@@ -128,6 +128,11 @@ class Tracer:
 
 
                     _contract_name = interface_name[1:] if interface_name[0] == 'I' else interface_name
+
+                    # if contract_name first letter is not capital, then only change first letter to capital
+                    if contract_name[0] not in string.ascii_uppercase:
+                        contract_name = contract_name[0].upper() + contract_name[1:]
+
 
                     for function_name in external_call[interface_name]:
 
