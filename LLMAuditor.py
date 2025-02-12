@@ -5,7 +5,7 @@ import re
 
 class LLMAuditor:
     def __init__(self, api_ip="localhost", model="deepseek-r1-distill-qwen-32b",
-                 max_tokens=7000, temperature=0.8, top_p=0.5, num_samples=5):
+                 max_tokens=8000, temperature=0.8, top_p=0.5, num_samples=5):
         self.api_url = f"http://{api_ip}:1234/v1/completions"
         self.model = model
         self.max_tokens = max_tokens
@@ -141,8 +141,6 @@ For each contract, analyze how functions interact with each other and whether se
 🚨 **STRICT RULE: Reentrancy vulnerabilities MUST NOT be analyzed, considered, or reported in any form.**
 - Even if reentrancy exists in the contract, IGNORE IT and do NOT report it.
 - Focus ONLY on business logic errors, incorrect state transitions, access control flaws, and data flow inconsistencies.
-- If a function contains a reentrancy pattern but does not have other business logic issues, consider it secure.
-
 ---
 
 ### 🔹 **2. Logical Consistency & Business Logic Validation**
@@ -227,6 +225,7 @@ Result: Vulnerable - Medium Risk, Keywords: [All of Your Identified Vulnerabilit
 Result: Secure
 '''
 
+Be sure to follow the output format
 ---
 
 ### 8. Smart Contracts to Audit:
@@ -316,16 +315,8 @@ Your role as a **security reviewer** is to analyze the vulnerabilities from thre
     - Are external dependencies (oracles, external calls, state updates) causing a critical issue?
     - Could this issue create **network-wide disruptions or systemic risks**?
 
-**🔹  Access Control & Trusted Entity Assumptions**
-- Identify any **modifier** or **require statement** that restricts function execution.
-- Determine **who is allowed** to execute the function (e.g., `onlyOwner`, `onlyOperator`, `onlyVault`).
-- **Use the following trust assumptions for access control:**
-    - ✅ **Operators (`onlyOperator`) are trusted and do not act maliciously.**
-    - ✅ **Vault-controlled functions (`onlyVault`) are managed by the protocol and are trusted.**
-    - ⚠️ **Governance-controlled functions (`onlyGovernance`) depend on the DAO and can be manipulated by governance attacks.**
-    - ❌ **Publicly accessible functions (`public`, `external`) should be fully scrutinized for vulnerabilities.**
 
-**If a function is controlled by a trusted entity (e.g., onlyOperator, onlyVault), assume they do not act maliciously and adjust risk classification accordingly.**  
+**If a function is controlled by a trusted entity, assume they do not act maliciously and adjust risk classification accordingly.**  
 
 **📌 If the vulnerability is confirmed:**
 - Clearly categorize whether it is a **Code Logic Bug, Business Logic Bug, or System Bug**.
