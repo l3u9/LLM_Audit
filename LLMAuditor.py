@@ -264,7 +264,6 @@ Result: Secure
             except Exception as e:
                 # recall this function
                 print("Error: ", e)
-                return self.decision_vuln(contracts, impacted_functions)
 
         return collections.Counter(decisions).most_common(1)[0][0], keywords
     
