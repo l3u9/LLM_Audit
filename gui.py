@@ -80,6 +80,9 @@ class SmartContractAnalyzer(QWidget):
         self.result_text.setReadOnly(True)
         self.result_text.setPlaceholderText("Analysis results will be displayed here...")
 
+        self.button_analyze_all_functions = QPushButton("Analyze All Functions in Selected Contract", self)
+        self.button_analyze_all_functions.clicked.connect(self.analyze_all_functions_in_selected_contract)
+
         # 🔹 보고서 저장 경로 선택 버튼
         self.button_set_save_path = QPushButton("Set Report Save Path")
         self.button_set_save_path.clicked.connect(self.set_save_path)
@@ -97,6 +100,7 @@ class SmartContractAnalyzer(QWidget):
         main_layout.addWidget(self.impact_checkbox)  # ✅ Impact 체크박스 추가
         main_layout.addWidget(self.button_analyze)
         main_layout.addWidget(self.button_analyze_all)
+        main_layout.addWidget(self.button_analyze_all_functions)
         main_layout.addWidget(self.button_set_save_path)
         main_layout.addWidget(self.result_text)
 
@@ -207,6 +211,37 @@ class SmartContractAnalyzer(QWidget):
                     review = "✅ No vulnerabilities found."
 
                 result_text += f"📑 Contract: {contract_name}, Function: {function_name}\n{review}\n{'-' * 50}\n"
+
+        self.result_text.setText(result_text)
+
+
+    def analyze_all_functions_in_selected_contract(self):
+        """ 선택한 컨트랙트의 모든 함수 분석 """
+        contract_name = self.contract_select.currentText()
+        if not contract_name:
+            QMessageBox.warning(self, "Warning", "Please select a contract.")
+            return
+
+        result_text = f"📑 Contract: {contract_name}\n\n"
+
+        # QSpinBox에서 depth 값을 가져옴
+        depth = self.spinbox_depth.value()
+        check_impact = self.impact_checkbox.isChecked()  # ✅ 체크 여부 확인
+
+        functions = self.client.manager.get_contract_info(contract_name)["Functions"]
+
+        for function in functions:
+            function_name = function["Function Name"]
+            review = self.client.analyze_and_review(contract_name, function_name, depth, check_impact=check_impact)
+
+            if review:
+                report_path = save_review_report(contract_name, function_name, review, self.save_path)
+                if report_path:
+                    print(f"✅ Report saved at: {report_path}")
+            else:
+                review = "✅ No vulnerabilities found."
+
+            result_text += f"🔍 Function: {function_name}\n{review}\n{'-' * 50}\n"
 
         self.result_text.setText(result_text)
 
