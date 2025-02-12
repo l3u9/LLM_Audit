@@ -257,8 +257,10 @@ Result: Secure
                 decision = self._parse_results(response.json()["choices"][0]["text"].strip())
                 decision_result = self._parse_decision(decision)
                 decisions.append(decision_result)
-                keywords.append(self._parse_keywords(decision))
-
+                _keywords = self._parse_keywords(decision)
+                keywords.append(_keywords)
+                print("Decision: ", decision_result)
+                print("Keywords: ", _keywords)
 
                 # responses.append(response.json()["choices"][0]["text"].strip())
             except Exception as e:
