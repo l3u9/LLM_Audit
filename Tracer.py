@@ -264,9 +264,6 @@ class Tracer:
                     else:
                         pass
 
-                    # Debugging: Check what changed in datas
-                    if datas != datas_backup:
-
                     modifieds.update(_modified)
                     modifiers.update(_modifiers)
 
