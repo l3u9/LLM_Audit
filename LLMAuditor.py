@@ -94,13 +94,9 @@ class LLMAuditor:
                 return res
     
     def _parse_decision(self, results):
-
-        # results = results.strip().split("Result: ")[1]
-        # result = results.strip().split("-")[0]
-        # return result
-        match = re.search(r"Result:\s*(.*?)(?=\s*,\s*Keywords:|$)", results)
+        match = re.search(r"Result:\s*([^-]+)", results)  # 하이픈('-') 앞의 문자열만 캡처
         if match:
-            result_value = match.group(1)
+            result_value = match.group(1).strip()  # 앞뒤 공백 제거
             return result_value
         return None
     
