@@ -104,14 +104,32 @@ class SmartContractAnalyzer(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to set API IP: {str(e)}")
 
+    # def upload_contract_files(self):
+    #     """ 사용자 스마트 컨트랙트 파일 업로드 """
+    #     files, _ = QFileDialog.getOpenFileNames(self, "Select Smart Contract Files", "", "Solidity Files (*.sol);;All Files (*)")
+
+    #     if files:
+    #         self.uploaded_files.extend(files)  # 파일 리스트 저장
+    #         self.uploaded_contracts.clear()
+    #         for file in self.uploaded_files:
+    #             self.uploaded_contracts.addItem(file)
+
+    #         # 📂 Client를 통해 컨트랙트 로드
+    #         self.client.load_contracts(self.uploaded_files)
+
+    #         # 📑 Select Contract 리스트 업데이트
+    #         self.update_contract_list()
+
+    #         QMessageBox.information(self, "Success", "Smart contract files uploaded successfully!")
     def upload_contract_files(self):
         """ 사용자 스마트 컨트랙트 파일 업로드 """
         files, _ = QFileDialog.getOpenFileNames(self, "Select Smart Contract Files", "", "Solidity Files (*.sol);;All Files (*)")
 
         if files:
-            self.uploaded_files.extend(files)  # 파일 리스트 저장
-            self.uploaded_contracts.clear()
-            for file in self.uploaded_files:
+            self.uploaded_files.extend(files)  # ✅ 기존 리스트에 새로운 파일 추가 (중복 원인)
+            self.uploaded_contracts.clear()  # ❌ 여기서는 위젯을 클리어하지만, self.uploaded_files는 초기화되지 않음
+            
+            for file in self.uploaded_files:  # ⚠️ 이전에 추가한 파일이 계속 유지됨
                 self.uploaded_contracts.addItem(file)
 
             # 📂 Client를 통해 컨트랙트 로드
@@ -121,6 +139,7 @@ class SmartContractAnalyzer(QWidget):
             self.update_contract_list()
 
             QMessageBox.information(self, "Success", "Smart contract files uploaded successfully!")
+
 
     def update_contract_list(self):
         """ 컨트랙트 선택 리스트 업데이트 """
