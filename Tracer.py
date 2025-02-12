@@ -6,21 +6,29 @@ import string
 class Tracer:
     def __init__(self, contract_manager):
         self.contract_manager = contract_manager
+    def _remove_dup(self, dict):
+        for key in dict:
+            dict[key] = list(dict.fromkeys(dict[key]))
 
-    # 중복 제거 함수
-    def _remove_duplicate_values(self, target_dict, reference_dict):
-        new_dict = OrderedDict()
-        
-        for key, value_list in target_dict.items():
-            if key in reference_dict:
-                reference_values = set(map(tuple, reference_dict[key]))  # 비교군을 튜플로 변환하여 집합 생성
-                filtered_values = [val for val in value_list if tuple(val) not in reference_values]
-                new_dict[key] = filtered_values
-            else:
-                new_dict[key] = value_list  # 비교 대상에 없으면 그대로 유지
-                
-        return new_dict
+        return dict
+    
 
+    def _remove_duplicates_from_list(self, seq):
+        """순서를 유지하며 리스트 내 중복 항목 제거 (해시 불가능한 항목도 처리)"""
+        new_list = []
+        for item in seq:
+            if item not in new_list:
+                new_list.append(item)
+        return new_list
+
+    def _remove_dup(self, dict_data):
+        """
+        주어진 딕셔너리(dict_data)의 각 key에 해당하는 리스트에서
+        중복된 항목을 제거하여 반환합니다.
+        """
+        for key in dict_data:
+            dict_data[key] = self._remove_duplicates_from_list(dict_data[key])
+        return dict_data
 
     def _get_traced_contract_codes(self, dicts):
         self.contract_manager.get_contract_names()
@@ -286,6 +294,7 @@ class Tracer:
 
         # impacted_functions = self._remove_duplicate_values(impacted_functions, datas)
         impacted_function = None
+        datas = self._remove_dup(datas)
         return datas, modifieds, modifier_codes, impacted_functions
 
 
