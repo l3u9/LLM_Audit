@@ -104,30 +104,17 @@ class SmartContractAnalyzer(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to set API IP: {str(e)}")
 
-    # def upload_contract_files(self):
-    #     """ 사용자 스마트 컨트랙트 파일 업로드 """
-    #     files, _ = QFileDialog.getOpenFileNames(self, "Select Smart Contract Files", "", "Solidity Files (*.sol);;All Files (*)")
 
-    #     if files:
-    #         self.uploaded_files.extend(files)  # 파일 리스트 저장
-    #         self.uploaded_contracts.clear()
-    #         for file in self.uploaded_files:
-    #             self.uploaded_contracts.addItem(file)
+    def upload_contract_files(self):
+        """ 사용자 스마트 컨트랙트 파일 업로드 """
+        files, _ = QFileDialog.getOpenFileNames(self, "Select Smart Contract Files", "", "Solidity Files (*.sol);;All Files (*)")
 
-    #         # 📂 Client를 통해 컨트랙트 로드
-    #         self.client.load_contracts(self.uploaded_files)
+        if files:
+            self.uploaded_files = files  # ✅ 기존 리스트를 초기화하여 새 파일만 유지
+            self.uploaded_contracts.clear()
 
-    #         # 📑 Select Contract 리스트 업데이트
-    #         self.update_contract_list()
-
-    #         QMessageBox.information(self, "Success", "Smart contract files uploaded successfully!")
-    def update_contract_list(self):
-        """ 컨트랙트 선택 리스트 업데이트 (중복 제거) """
-        self.contract_select.clear()  # 기존 리스트 초기화
-        contracts = list(set(self.client.manager.get_contract_names()))  # ✅ 중복 제거
-
-        for contract in sorted(contracts):  # 가독성을 위해 정렬
-            self.contract_select.addItem(contract)
+            for file in self.uploaded_files:
+                self.uploaded_contracts.addItem(file)
 
             # 📂 Client를 통해 컨트랙트 로드
             self.client.load_contracts(self.uploaded_files)
