@@ -241,7 +241,7 @@ Result: Secure
         keywords = []
 
         prompt = self.decision_prompt(self.formatting_datas(contracts, impacted_functions))
-        
+        print("Prompt: ", prompt)
         for _ in range(self.num_samples):
             try:
                 payload = {
