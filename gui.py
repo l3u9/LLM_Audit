@@ -45,7 +45,7 @@ class SmartContractAnalyzer(QWidget):
         self.spinbox_depth = QSpinBox(self)
         self.spinbox_depth.setMinimum(1)
         self.spinbox_depth.setMaximum(100)
-        self.spinbox_depth.setValue(5)  # 기본값 5
+        self.spinbox_depth.setValue(3)  # 기본값 5
         depth_layout.addWidget(self.label_depth)
         depth_layout.addWidget(self.spinbox_depth)
 
