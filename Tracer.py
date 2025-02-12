@@ -130,8 +130,8 @@ class Tracer:
                     _contract_name = interface_name[1:] if interface_name[0] == 'I' else interface_name
 
                     # if contract_name first letter is not capital, then only change first letter to capital
-                    if contract_name[0] not in string.ascii_uppercase:
-                        contract_name = contract_name[0].upper() + contract_name[1:]
+                    # if contract_name[0] not in string.ascii_uppercase:
+                    #     contract_name = contract_name[0].upper() + contract_name[1:]
 
 
                     for function_name in external_call[interface_name]:

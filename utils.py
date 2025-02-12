@@ -1,6 +1,8 @@
 import re
 import json
 import os
+import string
+
 
 def find_function(functions, function_name):
     for function in functions:
@@ -153,7 +155,9 @@ def parse_function_calls(function_code, global_elements):
         interface_matches = re.finditer(interface_regex, line)
         for match in interface_matches:
             interface_name, function_name = match.groups()
-            
+            if interface_name[0] not in string.ascii_uppercase:
+                        interface_name = interface_name[0].upper() + interface_name[1:]
+                        
             if interface_name not in function_calls["external_interface_calls"]:
                 function_calls["external_interface_calls"][interface_name] = []
             function_calls["external_interface_calls"][interface_name].append(function_name)
