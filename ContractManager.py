@@ -19,7 +19,7 @@ class ContractManager:
 
     def load_contracts_info(self):
         for contract_name in self.contract_names:
-            print("load_test: ", contract_name)
+
 
             self.contracts_info[contract_name] = load_from_json(contract_name)
     
@@ -27,15 +27,15 @@ class ContractManager:
         return self.contract_names
     
     def get_contract_info(self, contract_name):
-        print("Error test")
-        print("contract_name: ", contract_name)
-        print(self.contracts_info.get(contract_name, None))
+
+
+
         return self.contracts_info.get(contract_name, None)
 
     def _select_contract_function(self, contract_name, function_name):
         contract_info = self.get_contract_info(contract_name)
         if not contract_info:
-            print(f"Error: {contract_name} 컨트랙트 정보를 찾을 수 없습니다.")
+
             return None
 
         matching_functions = [
@@ -45,7 +45,7 @@ class ContractManager:
         ]
 
         if not matching_functions:
-            print(f"Error: {function_name} 함수가 {contract_name} 컨트랙트에서 발견되지 않았습니다.")
+
             return None
 
         return matching_functions  # 여러 개의 함수 코드가 있을 수 있으므로 리스트로 반환
@@ -156,7 +156,7 @@ class ContractManager:
                 if function["Modifier Code"]:
                     modifier_functions.append(function["Modifier Name"])
         
-        print("test modifier_functions: ", modifier_functions)
+
         return modifier_functions
     
 
@@ -195,7 +195,7 @@ class ContractManager:
         # find all contract function that impacted by modified state_vars
 
         impacted_modified_state_vars = {}
-        print("state_vars: ", state_vars)
+
         # output: state_vars:  {'LiquidRon': ['operatorFeeAmount'], 'LiquidProxy': [], 'RonHelper': []}
         for contract_name in state_vars:
             contract_info = self.get_contract_info(contract_name)
@@ -232,12 +232,12 @@ if __name__ == "__main__":
     modified_state_vars = contract_manager.get_functions_modified_state_vars(contract_name, function_name)
 
     impacted_function = contract_manager.get_impacted_modified_state_vars(modified_state_vars)
-    print("Modified State Variables: ", modified_state_vars)
+
     
-    print("Impacted Functions")
+
     for impacted in impacted_function:
-        print(impacted[0])
-        print(impacted[1])
-        print("\n")
+
+
+
         
 

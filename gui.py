@@ -146,7 +146,7 @@ class SmartContractAnalyzer(QWidget):
         self.contract_select.clear()
         contracts = self.client.manager.get_contract_names()
         for contract in contracts:
-            print("📑 Contract Name:", contract)
+
             self.contract_select.addItem(contract)
 
     def update_function_list(self):
@@ -154,7 +154,7 @@ class SmartContractAnalyzer(QWidget):
         self.function_select.clear()
         selected_contract = self.contract_select.currentText()
         if selected_contract:
-            print(f"📑 Selected Contract: {selected_contract}")
+
             functions = self.client.manager.get_contract_info(selected_contract)["Functions"]
             for function in functions:
                 self.function_select.addItem(function["Function Name"])
@@ -164,7 +164,7 @@ class SmartContractAnalyzer(QWidget):
         save_path = QFileDialog.getExistingDirectory(self, "Select Directory to Save Reports")
         if save_path:
             self.save_path = save_path
-            print(f"📂 Report Save Path Set: {self.save_path}")
+
 
     def analyze_selected_function(self):
         """ 선택된 컨트랙트 & 함수 분석 """
@@ -186,7 +186,7 @@ class SmartContractAnalyzer(QWidget):
             self.result_text.setText(f"📑 Contract: {contract_name}, Function: {function_name}\n\n{review}")
             report_path = save_review_report(contract_name, function_name, review, self.save_path)
             if report_path:
-                print(f"✅ Report saved at: {report_path}")
+
         else:
             self.result_text.setText("✅ No vulnerabilities found.")
 
@@ -199,7 +199,7 @@ class SmartContractAnalyzer(QWidget):
 
         for contract in contracts:
             contract_name = contract
-            print("TESTTEST contract_name: ", contract_name)
+
             functions = self.client.manager.get_contract_info(contract_name)["Functions"]
 
             for function in functions:

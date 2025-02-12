@@ -16,7 +16,7 @@ class Client:
     def analyze_and_review(self, contract_name, function_name, depth, check_impact=False):
 
         datas, modifieds, modifiers, impacted_function = self.tracer.trace_function_with_depth(contract_name, function_name, depth)
-        print("impacted_function: ", impacted_function)
+
 
         if check_impact:
             pass
@@ -54,6 +54,8 @@ class Client:
 
 
 
+
+
 def main():
     IManager = ContractManager()
     IAuditor = LLMAuditor()
@@ -61,24 +63,24 @@ def main():
 
     IManager.initial_save(["LiquidRon.sol", "RonHelper.sol", "LiquidProxy.sol", "ValidatorTracker.sol", "Escrow.sol"])
     IManager.load_contracts_info()
-    print("get Contract all Modifier Functions")
+
 
     modifiers = IManager.get_all_modifier_function()
     datas, modifieds, modifiers, impacted_function = ITracer.trace_function_with_depth("LiquidRon", "harvest",3)
     # decison, keywords = IAuditor.decision_vuln(datas, modifiers)
     decision, keywords = IAuditor.decision_vuln(datas, impacted_function)
-    print("[AI Audit Result]")
-    print("Decision: ", decision)
-    print("Keywords: ", keywords)
+
+
+
     # formatting_datas(datas)
 
-    print(type(decision))
-    print(type(keywords))
-    print("Decision: ", decision)
+
+
+
 
     if "Vulnerable" in decision:
-        print("========================================")
-        print("Reviewing Vulnerabilities")
+
+
         if not keywords or keywords == [None]:
             keywords_str = ""
         else:
@@ -86,9 +88,9 @@ def main():
 
         # 최종 문자열 결합
         result_str = f"Decision: {decision} | Keywords: {keywords_str}"
-        print(result_str)
+
         review = IAuditor.review_vulnerabilities(datas, impacted_function, result_str)
-        print(review)
+
 
 
 

@@ -25,14 +25,14 @@ class Tracer:
         self.contract_manager.get_contract_names()
         contract_codes = {}
         for contract_name in dicts:
-            # print(contract_name)
+
             function_name = dicts[contract_name]
-            # print(function_name)
+
 
             for function in function_name:
-                # print("function: ", function)
+
                 function_codes = self.contract_manager.get_function_code(contract_name, function)
-                # print("\n".join(function_codes[0]))
+
 
 
                 if contract_name not in contract_codes:
@@ -60,7 +60,7 @@ class Tracer:
                 
                 for modified in modified_state_vars:
                     contract_modified_state_vars[contract_name].append(modified)
-                    print("appended: ", modified)
+
 
                 # contract_modified_state_vars[contract_name] = modified_state_vars
 
@@ -72,7 +72,7 @@ class Tracer:
             function_name = dicts[contract_name]
             for function in function_name:
                 modifiers = self.contract_manager.get_contract_modifier_functions(contract_name)
-                # print("modifiers: ", modifiers)
+
 
                 if contract_name not in contract_modifiers:
                     contract_modifiers[contract_name] = []
@@ -86,21 +86,21 @@ class Tracer:
 
 
     def trace_function(self, contract_name, function_name):
-        print("trace_function")
+
         os.system("echo 'contract_name: " + contract_name + "'" + " > ./test3.txt")
         internal_calls = self.contract_manager.get_functions_internal_calls(contract_name, function_name)
         external_calls = self.contract_manager.get_functions_external_calls(contract_name, function_name)
         view_pure_calls = self.contract_manager.get_functions_view_pure_calls(contract_name, function_name)
 
-        # print(external_calls)
-        # print(internal_calls)
-        # print(view_pure_calls)
+
+
+
 
         contract_names = self.contract_manager.get_contract_names()
-        print("contract_names: ", contract_names)
+
         contracts_and_functions = OrderedDict()
-        # print("contract_name: ", contract_name)
-        # print("function_name: ", function_name)
+
+
         contracts_and_functions[contract_name] = [function_name]
 
         if internal_calls:
@@ -108,14 +108,14 @@ class Tracer:
                 for internal_call in calls:
                     for _contract_name in contract_names:
                         
-                        # print(type(internal_call))
+
 
                         _contract_name = _contract_name
-                        # print(contract_name)
+
                         function_names = self.contract_manager.get_function_names(_contract_name)
-                        # print(internal_call)
-                        # print((function_names))
-                        print("function_names: ", function_names)
+
+
+
                         if internal_call in function_names:
                             if _contract_name not in contracts_and_functions:
                                 contracts_and_functions[_contract_name] = []
@@ -125,8 +125,8 @@ class Tracer:
         if external_calls:
             for external_call in external_calls:
                 for interface_name in external_call:
-                    # print("====================================")
-                    # print(interface_name)
+
+
                     _contract_name = interface_name[1:] if interface_name[0] == 'I' else interface_name
 
                     for function_name in external_call[interface_name]:
@@ -159,10 +159,10 @@ class Tracer:
         _code_dict = self._get_traced_contract_codes(contracts_and_functions)
 
         _modified_state_vars = self._get_traced_contract_modified_state_vars(contracts_and_functions)
-        print("====================================")
-        print("contract_and_functions: ", contracts_and_functions)
-        print("modified_state_vars: ", _modified_state_vars)
-        print("====================================")
+
+
+
+
         _modifiers = self._get_traced_contract_modifiers(contracts_and_functions)
 
         contracts_and_functions.popitem(last=False)
@@ -172,14 +172,14 @@ class Tracer:
 
     def trace_function_with_depth(self, contract_name, function_name, depth=2):
         datas, dicts, modifieds, modifiers = self.trace_function(contract_name, function_name)
-        print("first modifieds: ", modifieds)
+
         impacted_functions = OrderedDict()
         _impacted = self.contract_manager.get_impacted_modified_state_vars(modifieds)
-        print("first impacted: ", _impacted)
-        print("type: ", type(_impacted))
+
+
         
         impacted_functions.update(_impacted)
-        print("first impacted_functions: ", impacted_functions)
+
         for i in range(depth-1):
             temp = deepcopy(dicts)
             ret = {}
@@ -193,7 +193,7 @@ class Tracer:
                     modifiers.update(_modifiers)
                     _impacted = self.contract_manager.get_impacted_modified_state_vars(modifieds)
                     impacted_functions.update(_impacted)
-                    print("ret: ", _ret)
+
 
             try:
                 temp = deepcopy(_ret)
@@ -222,68 +222,68 @@ if __name__ == "__main__":
 
     tracer = Tracer(contract_manager)
 
-    # print(tracer.trace_function("LiquidRon", "redelegateAmount"))
+
     # datas, dicts = (tracer.trace_function("LiquidRon", "harvest"))
 
     datas, modifieds, modifier_code, impacted_functions = tracer.trace_function_with_depth("LiquidRon", "harvest", 3)
 
-    print("Code")
+
     for data in datas:
-        print(data)
+
         for code in datas[data]:
-            print("\n".join(code))
-        print("\n")
 
-    print("Modified State Variables")
+
+
+
     for modified in modifieds:
-        print(modified)
-        print(modifieds[modified])
-        print("\n")
-    
-    print("Modifiers")
-    for modifier in modifier_code:
-        print(modifier)
-        print("\n".join(modifier_code[modifier]))
 
-    print("Impacted Functions")
+
+
+    
+
+    for modifier in modifier_code:
+
+
+
+
     # print ordered dict
 
-    print("impacted_functions: ", impacted_functions)
+
     for impacted in impacted_functions:
-        print(impacted)
+
         # print code format
         
         for code in impacted_functions[impacted]:
-            print("\n".join(code))
-            print("\n")
+
+
         
 
     # depth = 3
     # for i in range(depth-1):
     #     temp = deepcopy(dicts)
-    #     print("start dicts: ", dicts)
+
     #     for dic in dicts:
     #         functions = dicts[dic]
-    #         # print("functions: ", functions)
+
     #         for function in functions:
-    #             # print("test: ", dic)
-    #             print("====================================")
-    #             print(dic, function)
-    #             print("====================================")
+
+
+
+
                 
     #             data, ret = tracer.trace_function(dic, function)
-    #             print("data: ", data)
-    #             print("len(data): ", len(data))
+
+
     #             datas.update(data)
 
     
     # # datas = (tracer.trace_function("LiquidRon", "redelegateAmount"))
-    # print("last dicts: ", dicts)
 
-    # print("\n")
-    # print("Result")
+
+
+
     # for data in datas:
-    #     print(data)
+
     #     for code in datas[data]:
-    #         print("\n".join(code))
-    #     print("\n")
+
+

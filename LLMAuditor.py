@@ -39,7 +39,7 @@ class LLMAuditor:
     #                 formatted += "\n\nFunction Code: \n"
     #                 formatted += "\n".join(val)
 
-    #     # print(formatted)
+
     #     return formatted
     
     def set_api_ip(self, api_ip):
@@ -74,7 +74,7 @@ class LLMAuditor:
                         formatted += "\n\nFunction Code: \n"
                         formatted += "\n".join(val)
 
-        # print(formatted)
+
         return formatted
 
 
@@ -228,7 +228,7 @@ Result: Secure
 """
 
 
-        print(cot_prompt)
+
         return cot_prompt
 
 
@@ -239,7 +239,7 @@ Result: Secure
         # prompt = self.decision_prompt(self.formatting_datas(contracts, modifiers))
         decisions = []
         keywords = []
-        print("[Start Decision Vuln]")
+
         prompt = self.decision_prompt(self.formatting_datas(contracts, impacted_functions))
         
         for _ in range(self.num_samples):
@@ -258,12 +258,13 @@ Result: Secure
                 decision_result = self._parse_decision(decision)
                 decisions.append(decision_result)
                 keywords.append(self._parse_keywords(decision))
-                print("Cot Decision Result: ", decision, "Decision Result: ", decision_result)
+
 
                 # responses.append(response.json()["choices"][0]["text"].strip())
             except Exception as e:
                 # recall this function
                 print("Error: ", e)
+
 
         return collections.Counter(decisions).most_common(1)[0][0], keywords
     
@@ -442,6 +443,7 @@ Ensure that your final report is **accurate and based on real security risks**.
             # recall this function
             print("Error: ", e)
 
+
             return self.review_vulnerabilities(contracts, impacted_functions, result)
             
 
@@ -472,11 +474,11 @@ if __name__ == "__main__":
 
 
     decision, keywords = auditor.decision_vuln(contract_data)
-    print("\n[Smart Contract Security Report]:\n")
-    print(decision)
-    print("\n[Keywords]:\n")
-    print(keywords)
+
+
+
+
 
     review = auditor.review_vulnerabilities(contract_data, decision)
-    print("\n[Review]:\n")
-    print(review)
+
+

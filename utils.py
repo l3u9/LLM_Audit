@@ -20,11 +20,11 @@ def parse_modified_state_vars(function_code, global_variables):
 
     for m in match:
         var_name = m.group(1).strip()
-        # print("Matched Variable:", var_name)
+
         if var_name in global_variables:
             modified_state_vars.add(var_name)
 
-    # print("=====================================")
+
     return list(modified_state_vars)  # ✅ 최종 반환을 list로 변환
 
 
@@ -48,11 +48,11 @@ def initial_separate(contract_code):
     
     global_value = extract_structs_and_variables(functions[0])
     contract_name = get_contract_name(functions[0])[-1]
-    print("test contract_name: ", contract_name)
+
     if contract_name == ["UnknownContract"]:
         for function in functions:
-            # print(function)
-            # print("=====================================")
+
+
             contract_name = get_contract_name(function)[-1]
             if contract_name == ['contract']:
                 continue
@@ -238,7 +238,7 @@ def parse_function_calls(function_code, global_elements):
 #                 "View/Pure Calls": function_calls["view_pure_calls"]
 #             }
 #         })
-#     print("contractname: ", contract_name)
+
 #     with open(f"{contract_name[0]}_info.json", "w") as f:
 #         json.dump(parsed_info, f, indent=4)  # JSON serialization error fixed
 
@@ -289,7 +289,7 @@ def save_to_json(contract_name, global_value, functions):
                 "Modifier Code": function_lines
             })
     
-    print("contractname: ", contract_name)
+
     with open(f"{contract_name}_info.json", "w") as f:
         json.dump(parsed_info, f, indent=4)  # JSON serialization error fixed
 
@@ -301,7 +301,7 @@ def load_from_json(contract_name):
             data = json.load(f)
         return data
     except FileNotFoundError:
-        print(f"Error: {contract_name}_info.json 파일을 찾을 수 없습니다.")
+
         return None
 
 
@@ -325,10 +325,10 @@ def save_review_report(contract_name, function_name, review_text, save_path=None
         # 파일 저장
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(review_text)
-        print(f"📁 Report saved: {filepath}")
+
         return filepath
     except Exception as e:
-        print(f"❌ Error saving report: {e}")
+
         return None
     
 
@@ -337,17 +337,17 @@ if __name__ == "__main__":
     with open("LiquidRon.sol", "r") as f:
         contract_code = f.read()
 
-    print("Parsing Solidity Code...")
+
     functions, global_value, contract_name = initial_separate(contract_code)
     
     # Save parsed information to JSON
     save_to_json(contract_name, global_value, functions)
     
-    print(f"Contract Name: {contract_name}")
-    print(f"Global Variables: {global_value}")
-    print(f"Total Functions: {len(functions)}")
-    print("\n")
-    print("Parsed information has been saved to", f"{contract_name}_info.json")
+
+
+
+
+
 
     # data = load_from_json("LiquidRon")
-    # print(data)
+
