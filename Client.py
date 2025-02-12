@@ -26,11 +26,19 @@ class Client:
         decision, keywords = self.auditor.decision_vuln(datas, impacted_function)
         
         if "Vulnerable" in decision:
-            if not keywords or keywords == None:
+            # if not keywords or keywords == None:
+            #     keywords_str = ""
+            # else:
+            #     keywords_str = ", ".join(keywords)
+            for keyword in keywords:
+                if keyword == None:
+                    keywords.remove(keyword)
+            
+            if not keywords:
                 keywords_str = ""
             else:
                 keywords_str = ", ".join(keywords)
-        
+                
             result_str = f"Decision: {decision} | Keywords: {keywords_str}"
             review = self.auditor.review_vulnerabilities(datas, impacted_function, result_str)
             return review
