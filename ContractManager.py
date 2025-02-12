@@ -236,7 +236,9 @@ if __name__ == "__main__":
     
 
     for impacted in impacted_function:
-
+        print(impacted[0])
+        print(impacted[1])
+        print("\n")
 
 
         

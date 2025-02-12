@@ -222,68 +222,37 @@ if __name__ == "__main__":
 
     tracer = Tracer(contract_manager)
 
-
+    # print(tracer.trace_function("LiquidRon", "redelegateAmount"))
     # datas, dicts = (tracer.trace_function("LiquidRon", "harvest"))
 
     datas, modifieds, modifier_code, impacted_functions = tracer.trace_function_with_depth("LiquidRon", "harvest", 3)
 
-
+    print("Code")
     for data in datas:
-
+        print(data)
         for code in datas[data]:
+            print("\n".join(code))
+        print("\n")
 
-
-
-
+    print("Modified State Variables")
     for modified in modifieds:
-
-
-
+        print(modified)
+        print(modifieds[modified])
+        print("\n")
     
-
+    print("Modifiers")
     for modifier in modifier_code:
+        print(modifier)
+        print("\n".join(modifier_code[modifier]))
 
-
-
-
+    print("Impacted Functions")
     # print ordered dict
 
-
+    print("impacted_functions: ", impacted_functions)
     for impacted in impacted_functions:
-
+        print(impacted)
         # print code format
         
         for code in impacted_functions[impacted]:
-
-
-        
-
-    # depth = 3
-    # for i in range(depth-1):
-    #     temp = deepcopy(dicts)
-
-    #     for dic in dicts:
-    #         functions = dicts[dic]
-
-    #         for function in functions:
-
-
-
-
-                
-    #             data, ret = tracer.trace_function(dic, function)
-
-
-    #             datas.update(data)
-
-    
-    # # datas = (tracer.trace_function("LiquidRon", "redelegateAmount"))
-
-
-
-
-    # for data in datas:
-
-    #     for code in datas[data]:
-
-
+            print("\n".join(code))
+            print("\n")
