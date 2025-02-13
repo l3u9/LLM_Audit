@@ -208,7 +208,7 @@ Result: Secure
 Be sure to follow the output format
 ---
 
-### 8. Smart Contracts to Audit:
+### 7. Smart Contracts to Audit:
 {contracts}
 """
 
