@@ -51,22 +51,23 @@ def initial_separate(contract_code):
     global_value = extract_structs_and_variables(functions[0])
     contract_name = get_contract_name(functions[0])[-1]
 
-    if contract_name == ["UnknownContract"]:
+    if contract_name == "UnknownContract":
         for function in functions:
 
 
             contract_name = get_contract_name(function)[-1]
-            if contract_name == ['contract']:
+            if contract_name == 'contract':
                 continue
 
-            if contract_name != ["UnknownContract"]:
+            if contract_name != "UnknownContract":
                 break
 
 
     return functions, global_value, contract_name
 
 def get_contract_name(contract_code):
-    matches = re.findall(r"\b(abstract\s+contract|contract|library|interface)\s+(\w+)", contract_code)
+    print("contract_code: ", contract_code)
+    matches = re.findall(r"\b(abstract\s+contract|contract|library)\s+(\w+)", contract_code)
     return [match[1] for match in matches] if matches else ["UnknownContract"]
 
 def extract_structs_and_variables(solidity_code):
