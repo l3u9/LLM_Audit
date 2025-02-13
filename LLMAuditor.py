@@ -5,7 +5,7 @@ import re
 
 class LLMAuditor:
     def __init__(self, api_ip="localhost", model="deepseek-r1-distill-qwen-32b",
-                 max_tokens=8000, temperature=0.8, top_p=0.5, num_samples=5):
+                 max_tokens=50000, temperature=0.8, top_p=0.5, num_samples=5):
         self.api_url = f"http://{api_ip}:1234/v1/completions"
         self.model = model
         self.max_tokens = max_tokens
@@ -276,7 +276,7 @@ You are a **senior smart contract security reviewer**. Your task is to **verify 
 
 ---
 
-### 1️⃣ Audit Report from Security Analyst
+### 1. Audit Report from Security Analyst
 The following vulnerabilities were initially detected by the security auditor:
 
 {result}
@@ -285,7 +285,7 @@ These vulnerabilities were flagged as **potential security risks**. Note that th
 
 ---
 
-### 2️⃣ Reviewer Objectives
+### 2. Reviewer Objectives
 Your role as a **security reviewer** is to analyze the vulnerabilities from three different perspectives:
 
 - 🔹 **Code Logic Bug:**  
@@ -306,7 +306,7 @@ Your role as a **security reviewer** is to analyze the vulnerabilities from thre
 
 ---
 
-### 3️⃣ Smart Contract for Review
+### 3. Smart Contract for Review
 Below is the smart contract code that must be reviewed:
 
 ```solidity
@@ -315,7 +315,7 @@ Below is the smart contract code that must be reviewed:
 
 ---
 
-### 4️⃣ **Expected Output Format**
+### 4. **Expected Output Format**
 
 If the vulnerability is confirmed:
 ```
@@ -357,7 +357,7 @@ Keywords: [Reported Vulnerabilities]
 
 ---
 
-### 5️⃣ **Final Decision Process**
+### 5. **Final Decision Process**
 - Analyze each function individually and **validate whether the reported vulnerabilities actually exist.**
 - Check **who can execute the function** based on `modifier` or `require` statements.
 - Determine if the **executing entity is trusted**:
