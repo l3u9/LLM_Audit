@@ -97,7 +97,10 @@ class LLMAuditor:
         match = re.search(r"Result:\s*([^-]+)", results)  # 하이픈('-') 앞의 문자열만 캡처
         if match:
             result_value = match.group(1).strip()  # 앞뒤 공백 제거
-            return result_value
+            if "Vulnerable" in result_value:
+                return "Vulnerable"
+            else:
+                return "Secure"
         return None
     
     def _parse_keywords(self, results):
