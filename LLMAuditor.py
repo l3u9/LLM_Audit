@@ -287,71 +287,37 @@ You are a **senior smart contract security reviewer**. Your task is to **verify 
 
 ---
 
-### 1️⃣ **Audit Report from Security Analyst**
+### 1️⃣ Audit Report from Security Analyst
 The following vulnerabilities were initially detected by the security auditor:
 
 {result}
 
-These vulnerabilities were flagged as **potential security risks**, but your role is to **validate whether they are actual threats that could cause real financial or operational damage**.
+These vulnerabilities were flagged as **potential security risks**. Note that the previous auditor has already extracted specific **keywords** highlighting the reasons behind each flagged issue. Your task is to re-evaluate these vulnerabilities by **cross-checking the provided keywords with the actual smart contract code**.
 
 ---
 
-### 1. **Reviewer Objectives**
+### 2️⃣ Reviewer Objectives
 Your role as a **security reviewer** is to analyze the vulnerabilities from three different perspectives:
 
 - 🔹 **Code Logic Bug:**  
-    - Does the function have an internal logic error that causes unintended behavior?
-    - Could the code execute incorrectly due to an implementation flaw?
+  - Is there an internal logic error causing unintended behavior?
+  - Could the code execute incorrectly due to an implementation flaw?
 
 - 🔹 **Business Logic Bug:**  
-    - Does the function fail to achieve the intended protocol behavior?
-    - Could an attacker **abuse contract functionality** to gain an unfair advantage?
-    - Are incentives misaligned, allowing unintended financial gain?
+  - Does the function fail to achieve its intended protocol behavior?
+  - Could an attacker **abuse contract functionality** to gain an unfair advantage?
+  - Are incentives misaligned, potentially leading to unintended financial gain?
 
 - 🔹 **System Bug:**  
-    - Could this vulnerability be exploited in a way that **affects protocol security or stability**?
-    - Are external dependencies (oracles, external calls, state updates) causing a critical issue?
-    - Could this issue create **network-wide disruptions or systemic risks**?
+  - Can this vulnerability be exploited to **affect protocol security or stability**?
+  - Do external dependencies (oracles, external calls, state updates) introduce a critical issue?
+  - Could this issue create **network-wide disruptions or systemic risks**?
 
-
-**If a function is controlled by a trusted entity, assume they do not act maliciously and adjust risk classification accordingly.**  
-
-**📌 If the vulnerability is confirmed:**
-- Clearly categorize whether it is a **Code Logic Bug, Business Logic Bug, or System Bug**.
-- Identify **who can execute the vulnerable function**.
-- Determine **if they are trusted** and adjust risk classification accordingly.
-- Provide a **detailed issue description** explaining why it is valid.
-- Construct a **realistic attack scenario** demonstrating how an exploit could occur (POC).
-- Assess the **potential impact on the contract, users, and funds**.
-- Suggest a **high-level fix** to mitigate the risk.
-
-**📌 If the vulnerability is a false positive:**
-- Explain why the flagged issue **does not** introduce an actual security threat.
-- Identify **any misunderstandings** in the original audit that led to this incorrect classification.
+**If a function is controlled by a trusted entity, assume they do not act maliciously and adjust risk classification accordingly.**
 
 ---
 
-### 🔹 **2. Risk Classification**
-#### ✅ **1 - Low Risk (QA & Governance/Centralization)**
-- **State handling issues (e.g., function modifies state incorrectly but does not put assets at risk)**
-- **Functions that do not work according to spec (e.g., incorrect return values, function logic errors)**
-- **Governance & Centralization Risks (e.g., excessive admin privileges, lack of timelocks)**
-- **Excludes gas optimizations (which are evaluated separately)**
-- **Excludes non-critical issues such as code style, clarity, syntax, and event monitoring**
-
-#### ⚠️ **2 - Medium Risk**
-- **Assets are NOT directly at risk, but the protocol's function or availability could be impacted**
-- **Potential for leaking value under specific hypothetical attack conditions**
-- **Issues that depend on external conditions or requirements but could become critical under certain circumstances**
-
-#### 🚨 **3 - High Risk**
-- **Assets can be stolen, lost, or compromised directly**
-- **Indirect exploits that allow asset loss without requiring unrealistic assumptions**
-- **Critical financial risk, access control failures, or logical bugs leading to loss of user funds**
-
----
-
-### 3. **Smart Contract for Review**
+### 3️⃣ Smart Contract for Review
 Below is the smart contract code that must be reviewed:
 
 ```solidity
