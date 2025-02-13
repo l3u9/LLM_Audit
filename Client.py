@@ -37,8 +37,11 @@ class Client:
             if not keywords:
                 keywords_str = ""
             else:
-                keywords_str = ", ".join(keywords)
-                
+                keywords_str = ""
+                for keyword in keywords:
+                    if keyword:
+                        keywords_str += keyword + ", "
+                                        
             result_str = f"Decision: {decision} | Keywords: {keywords_str}"
             review = self.auditor.review_vulnerabilities(datas, impacted_function, result_str)
             return review
