@@ -223,6 +223,7 @@ Be sure to follow the output format
         keywords = []
 
         prompt = self.decision_prompt(self.formatting_datas(contracts, impacted_functions))
+        threshold = (self.num_samples // 2) + 1
         print("Prompt: ", prompt)
         for _ in range(self.num_samples):
             try:
@@ -244,6 +245,12 @@ Be sure to follow the output format
                 print("Decision: ", decision_result)
                 print("Keywords: ", _keywords)
 
+                # 동일한 Decision이 3번 이상 나오면 즉시 반환
+                decision_counter = collections.Counter(decisions)
+                most_common_decision, count = decision_counter.most_common(1)[0]
+                if count >= threshold:
+                    print(f"Threshold reached with decision: {most_common_decision}")
+                    return most_common_decision, keywords
                 # responses.append(response.json()["choices"][0]["text"].strip())
             except Exception as e:
                 # recall this function
