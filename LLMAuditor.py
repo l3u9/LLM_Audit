@@ -135,72 +135,91 @@ class LLMAuditor:
     def decision_prompt(self, contracts):
 
         cot_prompt = f"""
-You are a senior smart contract security auditor with a track record in Code4rena contest audits. Your task is to analyze the following Solidity smart contracts and identify only vulnerabilities that are realistically exploitable (Medium or High risk). **Do not report vulnerabilities that are merely theoretical or unlikely to be triggered, and do not provide recommendations or mitigation strategies.**
+You are a senior smart contract security auditor with a track record in Code4rena contest audits. 
+Your task is to analyze the following Solidity smart contracts and identify only vulnerabilities that 
+are realistically exploitable (Medium or High risk). Do NOT report vulnerabilities that are purely 
+theoretical or unlikely to be triggered, and do NOT provide any recommendations or mitigation strategies.
 
 ---
+### Analysis Process (Chain-of-Thought Approach)
+Please follow these three steps in your analysis:
 
+1. **Step 1: Identify Each Function's Intent**
+   - For each function, clarify its intended purpose (business logic), expected inputs/outputs, 
+     and the state changes it is supposed to make.
+   - Check if the actual code aligns with this intention. Look for any logic or implementation bugs 
+     that deviate from the function's intended behavior.
+
+2. **Step 2: Determine Impact on Other Functions**
+   - Investigate whether the identified bugs or inconsistencies in Step 1 can affect other functions. 
+   - Analyze how state changes or data flows from one function might introduce vulnerabilities in 
+     other parts of the contract (impacted functions).
+   - Consider if chaining these functions could lead to privilege escalation, unintended state manipulation, 
+     or asset compromise.
+
+3. **Step 3: Evaluate Realistic Attack Paths**
+   - Assess if the issues found in Steps 1 and 2 can be combined into a concrete, practical attack path. 
+   - Only classify a vulnerability as Medium or High risk if there is a clear, demonstrable way 
+     for an attacker to exploit it under typical conditions.
+
+**Important Notes:**
+- Reentrancy vulnerabilities must NOT be considered or reported under any circumstances.
+- Use historical Code4rena audit examples as a reference to ensure reported issues have a realistic attack path.
+- Focus on business logic errors, flawed state transitions, access control oversights, 
+  and data flow inconsistencies that are practically exploitable.
+
+---
 ### 1. Smart Contract Security & Logic Analysis
-Perform an in-depth analysis of how functions interact and whether vulnerabilities, logical inconsistencies, or data flow issues exist across execution flows. Instead of isolating functions, examine how multiple functions can be chained together to produce exploitable behavior.
+Examine how functions modify the contract state and whether chaining function calls could lead to unintended 
+side effects, privilege escalations, or asset compromise.
 
 #### Key Areas to Focus On:
-- How do different functions modify the contract state, and can these state changes be chained to create exploitable conditions?
-- Identify specific execution sequences that can lead to unintended side effects, privilege escalations, or asset compromise.
-- Evaluate if state transitions in one function create vulnerabilities in other functions that can be realistically exploited.
-- Assess external calls in combination with other operations to determine if they lead to tangible attack vectors.
-- Use historical examples from Code4rena audits as a reference to only report vulnerabilities that have a clear, demonstrable attack path.
-
-❗ **Important:** Do NOT classify a function as vulnerable solely because it exhibits a known attack pattern. Only report it if the pattern results in a practical exploit under typical conditions.
-
-🚨 **STRICT RULE: Reentrancy vulnerabilities MUST NOT be analyzed, considered, or reported in any form.**
-- Ignore any reentrancy-related issues entirely.
-- Focus exclusively on business logic errors, flawed state transitions, access control oversights, and data flow inconsistencies that are practically exploitable.
+- How do different functions modify the contract state, and can these state changes be chained 
+  to create exploitable conditions?
+- Identify specific execution sequences that lead to unintended side effects or asset compromise.
+- Evaluate if state transitions in one function create vulnerabilities in other functions 
+  that can be realistically exploited.
+- Assess external calls in combination with other operations to determine if they yield tangible attack vectors.
 
 ---
-
 ### 2. Logical Consistency & Business Logic Validation
-Examine whether the contract functions operate correctly under various execution scenarios:
-- Validate that function logic truly aligns with its intended purpose and does not contradict realistic use cases.
-- Confirm that inputs and outputs are processed correctly without hidden opportunities for exploitation.
-- Scrutinize loops and iteration behaviors to ensure they cannot be abused in realistic attack sequences.
-- Analyze the impact of function execution order and interdependencies to uncover any subtle yet exploitable flaws.
-- Require that any vulnerability must have a clear, feasible attack path reminiscent of past Code4rena contest findings.
+- Validate that each function's logic aligns with its intended purpose.
+- Confirm that inputs and outputs are processed correctly without hidden exploitation opportunities.
+- Scrutinize loops, iteration behaviors, and execution order to uncover exploitable flaws.
+- Ensure that any vulnerability reported has a clear, feasible attack path reminiscent 
+  of past Code4rena findings.
 
 ---
-
 ### 3. Realistic Exploitation & Attack Scenarios
 For every identified issue, ensure that:
 - The vulnerability can be chained with other contract behaviors to yield a realistic attack scenario.
-- The exploit is practical under real-world conditions without relying on highly contrived circumstances.
-- The identified risk leads to tangible outcomes (e.g., financial loss, unauthorized control, or critical state manipulation) as observed in actual contests.
+- The exploit is practical under real-world conditions without relying on contrived circumstances.
+- The identified risk leads to tangible outcomes (e.g., financial loss, unauthorized control, or critical state manipulation).
 
-❗ **Only report vulnerabilities that have a clear, demonstrable attack path.**  
-If an issue is purely theoretical or cannot be triggered practically, do not classify it as Medium or High risk.
+Only report vulnerabilities that have a clear, demonstrable attack path. 
+If an issue is purely theoretical or cannot be practically triggered, do not classify it as Medium or High risk.
 
 ---
-
 ### 4. Preventing False Secure Classification
 A contract should be classified as "No Critical Vulnerabilities Found" only if:
 1. There are absolutely no business logic errors, state inconsistencies, or exploitable data flow issues.
 2. Every function has been thoroughly evaluated for realistic attack scenarios.
-3. All potential vulnerabilities have been cross-verified against practical exploitation conditions seen in prior contest audits.
-
-⚠️ If no critical vulnerabilities are found, report:
-Result: No Critical Vulnerabilities Found
-rather than "Secure", to indicate that further analysis may still be required.
+3. All potential vulnerabilities have been cross-verified against practical exploitation conditions 
+   seen in prior contest audits.
 
 ---
-
 ### 5. Risk Classification
 #### Medium Risk:
-- Vulnerabilities where assets are not immediately at risk but realistic exploitation could disrupt functionality or leak value.
-- Issues that may only manifest under specific, plausible attack conditions.
+- Vulnerabilities where assets are not immediately at risk but realistic exploitation 
+  could disrupt functionality or leak value.
+- Issues that may manifest only under specific, plausible attack conditions.
 
 #### High Risk:
 - Vulnerabilities that directly allow asset theft, loss, or unauthorized control.
-- Flaws that could lead to significant financial loss or a complete contract compromise under demonstrable, real-world conditions.
+- Flaws that could lead to significant financial loss or complete contract compromise 
+  under demonstrable, real-world conditions.
 
 ---
-
 ### 6. Result Output Format
 - If the contract has a **High risk vulnerability**:
 '''
@@ -217,9 +236,7 @@ Result: Vulnerable - Medium Risk, Keywords: [All of Your Identified Vulnerabilit
 Result: Secure
 '''
 
-Be sure to follow the output format
 ---
-
 ### 7. Smart Contracts to Audit:
 {contracts}
 """
@@ -238,7 +255,7 @@ Be sure to follow the output format
         keywords = []
 
         prompt = self.decision_prompt(self.formatting_datas(contracts, impacted_functions))
-        threshold = (self.num_samples // 2) + 2
+        threshold = (self.num_samples // 2) + 1
         print("Prompt: ", prompt)
         for _ in range(self.num_samples):
             try:
