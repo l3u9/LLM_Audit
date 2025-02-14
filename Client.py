@@ -26,21 +26,13 @@ class Client:
         decision, keywords = self.auditor.decision_vuln(datas, impacted_function)
         
         if "Vulnerable" in decision:
-            # if not keywords or keywords == None:
-            #     keywords_str = ""
-            # else:
-            #     keywords_str = ", ".join(keywords)
+            # keywords가 None이 아닌 경우에만 라인 번호 포함하여 처리
+            keywords_str = ""
             for keyword in keywords:
-                if keyword == None:
-                    keywords.remove(keyword)
-            
-            if not keywords:
-                keywords_str = ""
-            else:
-                keywords_str = ""
-                for keyword in keywords:
-                    if keyword:
-                        keywords_str += keyword + ", "
+                if isinstance(keyword, tuple):  # (키워드, 코드라인) 형태일 때
+                    keywords_str += f"{keyword[0]} (Code Line {keyword[1]}), "  # 키워드와 코드라인 출력
+                else:
+                    keywords_str += f"{keyword}, "  # 키워드만 출력
                                         
             result_str = f"Decision: {decision} | Keywords: {keywords_str}"
             review = self.auditor.review_vulnerabilities(datas, impacted_function, result_str)
