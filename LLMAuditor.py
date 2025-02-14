@@ -76,7 +76,7 @@ class LLMAuditor:
         if impacted_functions:
             for i, (key, value) in enumerate(impacted_functions.items()):
                 if len(value) > 0:
-                    formatted += f"\n\n#### Impacted Function\n\n"
+                    formatted += f"\n\n#### Impacted Function {i+1}\n\n"
                     formatted += f"Contract Name: {key}\n\n"
                     for val in value:
                         formatted += "\n\nFunction Code: \n"

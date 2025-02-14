@@ -6,11 +6,12 @@ import string
 class Tracer:
     def __init__(self, contract_manager):
         self.contract_manager = contract_manager
-    def _remove_dup(self, dict):
-        for key in dict:
-            dict[key] = list(dict.fromkeys(dict[key]))
 
-        return dict
+    def _remove_duplicate_values(self, dict1, dict2):
+        # dict1의 값 중 dict2에도 있는 값 제거
+        for key in dict1:
+            dict1[key] = [value for value in dict1[key] if value not in dict2[key]]
+        return dict1
     
 
     def _remove_duplicates_from_list(self, seq):
@@ -278,6 +279,7 @@ class Tracer:
                     _impacted = self.contract_manager.get_impacted_modified_state_vars(modifieds)
                     impacted_functions.update(_impacted)
 
+
                     if isinstance(_ret, dict):
                         ret.update(_ret)
                     else:
@@ -292,14 +294,14 @@ class Tracer:
                 continue
             modifier_codes[modifier] = modifier_code
 
-        # impacted_functions = self._remove_duplicate_values(impacted_functions, datas)
+        impacted_functions = self._remove_duplicate_values(impacted_functions, datas)
         print("impacted_functions: ", impacted_functions)
         datas = self._remove_dup(datas)
         return datas, modifieds, modifier_codes, impacted_functions
 
 
 if __name__ == "__main__":
-    contract_paths = ["LiquidRon.sol", "RonHelper.sol", "LiquidProxy.sol", "ValidatorTracker.sol", "Escrow.sol"]
+    contract_paths = ["KeeperProxy.sol", "GmxProxy.sol", "PerpetualVault.sol", "VaultReader.sol"]
     contract_manager = ContractManager()
     contract_manager.initial_save(contract_paths)
     contract_manager.load_contracts_info()
@@ -309,7 +311,7 @@ if __name__ == "__main__":
     # print(tracer.trace_function("LiquidRon", "redelegateAmount"))
     # datas, dicts = (tracer.trace_function("LiquidRon", "harvest"))
 
-    datas, modifieds, modifier_code, impacted_functions = tracer.trace_function_with_depth("LiquidRon", "harvest", 3)
+    datas, modifieds, modifier_code, impacted_functions = tracer.trace_function_with_depth("PerpetualVault", "run", 3)
 
     print("Code")
     for data in datas:
