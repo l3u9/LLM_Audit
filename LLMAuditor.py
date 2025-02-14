@@ -45,6 +45,18 @@ class LLMAuditor:
     def set_api_ip(self, api_ip):
         self.api_url = f"http://{api_ip}:1234/v1/completions"
 
+    def set_context_length(self, max_tokens):
+        self.max_tokens = max_tokens
+    
+    def set_temperature(self, temperature):
+        self.temperature = temperature
+    
+    def set_top_p(self, top_p):
+        self.top_p = top_p
+    
+    def set_num_samples(self, num_samples):
+        self.num_samples = num_samples
+
     def formatting_datas(self, datas, impacted_functions=None):
         
         # enumerate loop using dict
