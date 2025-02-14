@@ -98,38 +98,32 @@ class LLMAuditor:
         return formatted
 
 
-    def _parse_results(self, response):
-        # parse Like "Result: Vulerable"
-        responses = response.strip().split("\n")
-        for res in responses:
-            if "Result:" in res:
-                return res
-    
     def _parse_decision(self, results):
-        match = re.search(r"Result:\s*([^-]+)", results)  # 하이픈('-') 앞의 문자열만 캡처
+        """Result 값을 파싱하여 취약 여부 결정"""
+        match = re.search(r"Result:\s*([^-]+)", results)  # 'Result:' 다음의 문자열 추출
         if match:
-            result_value = match.group(1).strip()  # 앞뒤 공백 제거
+            result_value = match.group(1).strip()
             if "Vulnerable" in result_value:
                 return "Vulnerable"
             else:
                 return "Secure"
         return None
     
+
     def _parse_keywords(self, results):
-        # # parse Keywords
-
-        # if "Keywords:" not in results:
-        #     return None
-        # else:
-        #     keywords = results.split("Keywords: ")[1]
-        #     return keywords
-
         match = re.search(r"Keywords:\s*(.*)", results)
         if match:
             keywords = match.group(1)
-            return keywords
-        return None
-
+            
+            # 'Code Line(s): [Line 3]' 형식에서 라인 번호 파싱
+            line_match = re.search(r"Code Line\(s\): \[([^\]]+)\]", results)
+            if line_match:
+                line_numbers = line_match.group(1).split(",")  # 여러 라인 번호를 쉼표로 구분하여 리스트로 변환
+                line_numbers = [line.strip() for line in line_numbers]  # 불필요한 공백 제거
+                return keywords, line_numbers  # 키워드와 라인번호 리스트 반환
+            
+            return keywords, None
+        return None, None
 
 
     def decision_prompt(self, contracts): 
@@ -141,114 +135,115 @@ theoretical or unlikely to be triggered, and do NOT provide any recommendations 
 
 ---
 ### Analysis Process (Chain-of-Thought Approach)
-Please follow these three steps in your analysis:
+Follow these structured steps to ensure accurate vulnerability identification:
 
-1. **Step 1: Identify Each Function's Intent**
-   - For **each** function (Entry, Dependent, or Impacted), clarify its intended purpose, 
-     expected inputs/outputs, and the state changes it is supposed to make.
-   - Check if the actual code aligns with this intention. Look for any logic or implementation bugs 
-     that deviate from the function's intended behavior.
-   - This includes verifying correct access controls, parameter validations, and ensuring 
-     no unintended side effects occur within each function individually.
+1. **Step 1: Identify Each Function's Intent & Expected Behavior**
+   - For **each** function (Entry, Dependent, or Impacted), determine its intended purpose, 
+     expected inputs/outputs, and expected state changes.
+   - Check if the actual implementation aligns with this intended behavior.
+   - Look for access control misconfigurations, improper parameter validation, or unintended 
+     side effects that could introduce vulnerabilities.
 
-2. **Step 2: Determine Impact on Other Functions**
-   - Investigate whether the identified bugs or inconsistencies in Step 1 (for **all** functions) 
-     can affect other functions.
-   - Specifically, analyze how Entry/Dependent Functions might create incorrect or maliciously exploitable states 
-     that Impacted Functions rely on.
-   - If a bug is found in Entry/Dependent Functions themselves (e.g., missing access checks), 
-     highlight how that bug could propagate to or be exploited through Impacted Functions as well.
+2. **Step 2: Evaluate Cross-Function Interactions & State Modifications**
+   - Analyze how Entry/Dependent functions modify the contract state and determine if any function 
+     call sequences can lead to incorrect or maliciously exploitable states.
+   - If a bug in one function (e.g., missing access checks) propagates to another function, 
+     explain how it can be exploited in practice.
+   - Check whether external calls combined with state changes result in security flaws.
 
-3. **Step 3: Evaluate Realistic Attack Paths**
-   - Combine the findings from Steps 1 and 2 to see if there is a concrete, practical attack path. 
-   - This includes vulnerabilities found **directly** in Entry/Dependent Functions 
-     (e.g., logic flaws, missing checks) as well as those that manifest in Impacted Functions 
-     due to prior state manipulation.
-   - Only classify a vulnerability as Medium or High risk if there is a clear, demonstrable way 
-     for an attacker to exploit it under typical conditions.
-
-**Important Notes:**
-- Reentrancy vulnerabilities must NOT be considered or reported under any circumstances.
-- Use historical Code4rena audit examples as a reference to ensure reported issues have a realistic attack path.
-- Focus on business logic errors, flawed state transitions, access control oversights, 
-  and data flow inconsistencies that are practically exploitable.
+3. **Step 3: Construct Realistic Attack Scenarios**
+   - Identify clear, practical attack paths that an adversary could exploit.
+   - Ensure that vulnerabilities classified as Medium or High risk are **demonstrably exploitable** 
+     under real-world conditions.
+   - If an issue is identified but lacks a direct attack vector, it should **not** be classified as Medium/High risk.
 
 ---
 ### 1. Smart Contract Security & Logic Analysis
-Examine how functions modify the contract state and whether chaining function calls could lead to unintended 
+Examine how functions modify the contract state and whether function calls can be chained to cause unintended 
 side effects, privilege escalations, or asset compromise.
 
 #### Key Areas to Focus On:
-- How do different functions modify the contract state, and can these state changes be chained 
-  to create exploitable conditions?
-- Identify specific execution sequences that lead to unintended side effects or asset compromise.
-- Evaluate if state transitions in one function create vulnerabilities in other functions 
-  that can be realistically exploited.
-- Assess external calls in combination with other operations to determine if they yield tangible attack vectors.
+- How do different functions modify the contract state, and can these state changes be exploited across calls?
+- Identify execution sequences that could result in unintended asset compromise or functional disruptions.
+- Evaluate whether interactions between functions introduce vulnerabilities that may not be apparent in isolation.
+- Assess external calls within function execution and determine if they introduce exploitable attack vectors.
 
 ---
 ### 2. Logical Consistency & Business Logic Validation
-- Validate that each function's logic aligns with its intended purpose.
+- Validate that function logic aligns with its intended purpose.
 - Confirm that inputs and outputs are processed correctly without hidden exploitation opportunities.
-- Scrutinize loops, iteration behaviors, and execution order to uncover exploitable flaws.
-- Ensure that any vulnerability reported has a clear, feasible attack path reminiscent 
-  of past Code4rena findings.
+- Scrutinize loops, iteration behavior, and execution order to uncover logical flaws.
+- Any vulnerability reported must have a **clear, feasible attack path**, comparable to past Code4rena findings.
 
 ---
 ### 3. Realistic Exploitation & Attack Scenarios
 For every identified issue, ensure that:
-- The vulnerability can be chained with other contract behaviors to yield a realistic attack scenario.
-- The exploit is practical under real-world conditions without relying on contrived circumstances.
-- The identified risk leads to tangible outcomes (e.g., financial loss, unauthorized control, or critical state manipulation).
-
-Only report vulnerabilities that have a clear, demonstrable attack path. 
-If an issue is purely theoretical or cannot be practically triggered, do not classify it as Medium or High risk.
+- It can be **realistically exploited** under typical contract conditions.
+- It is **not dependent on highly unlikely edge cases** or unrealistic attacker setups.
+- It leads to **tangible security risks**, such as financial loss, unauthorized access, or contract state manipulation.
 
 ---
-### 4. Preventing False Secure Classification
-A contract should be classified as "No Critical Vulnerabilities Found" only if:
-1. There are absolutely no business logic errors, state inconsistencies, or exploitable data flow issues.
-2. Every function has been thoroughly evaluated for realistic attack scenarios.
-3. All potential vulnerabilities have been cross-verified against practical exploitation conditions 
-   seen in prior contest audits.
+### 4. Handling Reentrancy & State Manipulation
+- **Do NOT report reentrancy vulnerabilities** unless they introduce broader **state manipulation risks**.
+- If an external call results in unintended contract state changes, it **must be analyzed** for potential impact.
+- Any issue related to **unexpected state transitions** or **cross-function exploits** should be included.
 
 ---
-### 5. Risk Classification
+### 5. Preventing False Secure Classification
+A contract should only be classified as **"Secure"** if:
+1. No exploitable business logic errors, state inconsistencies, or access control flaws exist.
+2. All provided functions have been thoroughly analyzed for realistic attack paths.
+3. Any minor inconsistencies do **not** result in significant security risks.
+
+---
+### 6. Risk Classification
 #### Medium Risk:
-- Vulnerabilities where assets are not immediately at risk but realistic exploitation 
-  could disrupt functionality or leak value.
-- Issues that may manifest only under specific, plausible attack conditions.
+- Vulnerabilities where assets are **not immediately at risk** but **realistic exploitation** 
+  could cause disruptions, financial losses, or privilege escalations.
+- Issues that require **plausible attack conditions** to manifest.
 
 #### High Risk:
-- Vulnerabilities that directly allow asset theft, loss, or unauthorized control.
-- Flaws that could lead to significant financial loss or complete contract compromise 
-  under demonstrable, real-world conditions.
+- Vulnerabilities that **directly** enable asset theft, loss, or unauthorized control.
+- Flaws that can result in **significant financial loss** or complete contract compromise 
+  under normal operating conditions.
 
 ---
-### 6. Result Output Format
-- If the contract has a **High risk vulnerability**:
+### 7. Result Output Format (Includes Code Line Information)
+Each identified vulnerability must include the **affected function name and the exact line number(s)** 
+where the issue occurs.  
+
+If the contract has a **High risk vulnerability**:
 '''
-Result: Vulnerable - High Risk, Keywords: [All of Your Identified Vulnerability Here]
+Result: Vulnerable - High Risk  
+Function: <Function Name>  
+Code Line(s): [Line Numbers]  
+Keywords: [Identified Vulnerability Here]  
 '''
 
-- If the contract has a **Medium risk vulnerability**:
+If the contract has a **Medium risk vulnerability**:
 '''
-Result: Vulnerable - Medium Risk, Keywords: [All of Your Identified Vulnerability Here]
+Result: Vulnerable - Medium Risk  
+Function: <Function Name>  
+Code Line(s): [Line Numbers]  
+Keywords: [Identified Vulnerability Here]  
 '''
 
-- If the contract has no high-risk vulnerabilities but might still have minor issues:
+If the contract has no **Medium or High risk vulnerabilities**, but minor issues exist:
 '''
-Result: Secure
+Result: Secure  
 '''
 
 ---
-### 7. Final Output Restriction
-The final answer must include only the final result without any additional explanation or chain-of-thought process.
+### 8. Final Output Restriction
+- The final output **must only contain the final result** as per the format above.
+- **Do not provide any chain-of-thought explanation or reasoning in the final output.**
+- However, internally, you must perform structured reasoning to ensure accurate vulnerability classification.
 
 ---
-### 8. Smart Contracts to Audit:
+### 9. Smart Contracts to Audit:
 {contracts}
 """
+
         return cot_prompt
 
 
@@ -256,13 +251,13 @@ The final answer must include only the final result without any additional expla
     # def decision_vuln(self, contracts, modifiers):
     def decision_vuln(self, contracts, impacted_functions=None):
         """ 여러 개의 스마트 컨트랙트 최상위 함수 분석 + Self-Consistency 적용 """
-        # prompt = self.decision_prompt(self.formatting_datas(contracts, modifiers))
         decisions = []
         keywords = []
 
         prompt = self.decision_prompt(self.formatting_datas(contracts, impacted_functions))
         threshold = (self.num_samples // 2) + 1
         print("Prompt: ", prompt)
+
         for _ in range(self.num_samples):
             try:
                 payload = {
@@ -274,12 +269,16 @@ The final answer must include only the final result without any additional expla
                     "stop": None
                 }
                 response = requests.post(self.api_url, json=payload)
-                # response.raise_for_status()
-                decision = self._parse_results(response.json()["choices"][0]["text"].strip())
-                decision_result = self._parse_decision(decision)
+                response_text = response.json()["choices"][0]["text"].strip()
+                
+                # decision = self._parse_results(response_text)
+                decision_result = self._parse_decision(response_text)
+                _keywords = self._parse_keywords(response_text)
+
                 decisions.append(decision_result)
-                _keywords = self._parse_keywords(decision)
-                keywords.append(_keywords)
+                if _keywords:  # None이 아닌 경우에만 추가
+                    keywords.append(_keywords)
+
                 print("Decision: ", decision_result)
                 print("Keywords: ", _keywords)
 
@@ -289,13 +288,12 @@ The final answer must include only the final result without any additional expla
                 if count >= threshold:
                     print(f"Threshold reached with decision: {most_common_decision}")
                     return most_common_decision, keywords
-                # responses.append(response.json()["choices"][0]["text"].strip())
+            
             except Exception as e:
-                # recall this function
                 print("Error: ", e)
 
-
-        return collections.Counter(decisions).most_common(1)[0][0], keywords
+        # 최종 결과 반환 시 keywords 리스트에서 None 값 제거
+        return collections.Counter(decisions).most_common(1)[0][0], list(filter(None, keywords))
     
     # def review_prompt(self, contracts, modifiers, result):
 
