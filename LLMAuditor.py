@@ -144,20 +144,26 @@ theoretical or unlikely to be triggered, and do NOT provide any recommendations 
 Please follow these three steps in your analysis:
 
 1. **Step 1: Identify Each Function's Intent**
-   - For each function, clarify its intended purpose (business logic), expected inputs/outputs, 
-     and the state changes it is supposed to make.
+   - For **each** function (Entry, Dependent, or Impacted), clarify its intended purpose, 
+     expected inputs/outputs, and the state changes it is supposed to make.
    - Check if the actual code aligns with this intention. Look for any logic or implementation bugs 
      that deviate from the function's intended behavior.
+   - This includes verifying correct access controls, parameter validations, and ensuring 
+     no unintended side effects occur within each function individually.
 
 2. **Step 2: Determine Impact on Other Functions**
-   - Investigate whether the identified bugs or inconsistencies in Step 1 can affect other functions. 
-   - Analyze how state changes or data flows from one function might introduce vulnerabilities in 
-     other parts of the contract (impacted functions).
-   - Consider if chaining these functions could lead to privilege escalation, unintended state manipulation, 
-     or asset compromise.
+   - Investigate whether the identified bugs or inconsistencies in Step 1 (for **all** functions) 
+     can affect other functions.
+   - Specifically, analyze how Entry/Dependent Functions might create incorrect or maliciously exploitable states 
+     that Impacted Functions rely on.
+   - If a bug is found in Entry/Dependent Functions themselves (e.g., missing access checks), 
+     highlight how that bug could propagate to or be exploited through Impacted Functions as well.
 
 3. **Step 3: Evaluate Realistic Attack Paths**
-   - Assess if the issues found in Steps 1 and 2 can be combined into a concrete, practical attack path. 
+   - Combine the findings from Steps 1 and 2 to see if there is a concrete, practical attack path. 
+   - This includes vulnerabilities found **directly** in Entry/Dependent Functions 
+     (e.g., logic flaws, missing checks) as well as those that manifest in Impacted Functions 
+     due to prior state manipulation.
    - Only classify a vulnerability as Medium or High risk if there is a clear, demonstrable way 
      for an attacker to exploit it under typical conditions.
 
