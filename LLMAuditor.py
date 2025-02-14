@@ -99,34 +99,39 @@ class LLMAuditor:
 
 
     def _parse_decision(self, results):
-        """Result 값을 파싱하여 취약 여부 결정"""
-        match = re.search(r"Result:\s*([^-]+)", results)  # 'Result:' 다음의 문자열 추출
-        if match:
-            result_value = match.group(1).strip()
-            if "Vulnerable" in result_value:
-                return "Vulnerable"
-            else:
-                return "Secure"
-        return None
+            """여러 개의 'Result:' 값 중 가장 심각한 취약성을 반환"""
+            matches = re.findall(r"Result:\s*([^-]+)", results)  # 모든 'Result:' 값 추출
+            if not matches:
+                return None  # 결과가 없으면 None 반환
+            
+            decisions = [match.strip() for match in matches]
 
+            # 취약성이 포함된 경우 "Vulnerable" 반환 (우선순위 고려)
+            for decision in decisions:
+                if f"Vulnerable" in decision:
+                    return "Vulnerable"
+
+            # 모든 결과가 "Secure"라면 "Secure" 반환
+            return "Secure"
 
     def _parse_keywords(self, results):
-        # Function과 Code Line(s)를 함께 처리하는 정규식
-        match = re.search(r"Function:\s*([^\n]+)\s+Code Line\(s\):\s*\[([^\]]+)\]", results)
+        """Function, Keywords, Code Line(s)를 추출하여 리스트로 반환"""
+        findings = []
         
-        if match:
-            function_name = match.group(1).strip()  # Function Name 추출 (LiquidProxy를 포함할 수 있도록)
-            line_numbers = match.group(2).split(",")  # 쉼표로 구분된 라인 번호들
-            line_numbers = [line.strip() for line in line_numbers]  # 각 라인 번호에서 공백 제거
-            
-            # Keywords 추출
-            keywords_match = re.search(r"Keywords:\s*(.*)", results)
-            if keywords_match:
-                keywords = keywords_match.group(1).strip()
-                # Function Name을 Keywords의 첫 번째 인덱스로 포함시켜서 반환
-                return [function_name] + [keywords], line_numbers  # Function Name과 Keywords를 포함한 리스트와 Line Numbers 반환
-        
-        return None, None  # 해당 데이터가 없으면 None 반환
+        # 여러 개의 결과를 개별적으로 추출
+        matches = re.finditer(
+            r"Function:\s*(.*?)\s*Code Line\(s\):\s*\[(.*?)\]\s*Keywords:\s*(.*)", results, re.DOTALL
+        )
+
+        for match in matches:
+            function_name = match.group(1).strip()
+            line_numbers = match.group(2).strip()
+            keywords = match.group(3).strip()
+
+            findings.append(([function_name, keywords], line_numbers))
+
+        return findings if findings else []  # ✅ 발견된 결과가 없으면 빈 리스트 반환
+
     
     
     def decision_prompt(self, contracts): 
@@ -285,12 +290,12 @@ Result: Secure
                 print("Decision: ", decision_result)
                 print("Keywords: ", _keywords)
 
-                # 동일한 Decision이 3번 이상 나오면 즉시 반환
-                decision_counter = collections.Counter(decisions)
-                most_common_decision, count = decision_counter.most_common(1)[0]
-                if count >= threshold:
-                    print(f"Threshold reached with decision: {most_common_decision}")
-                    return most_common_decision, keywords
+                # # 동일한 Decision이 3번 이상 나오면 즉시 반환
+                # decision_counter = collections.Counter(decisions)
+                # most_common_decision, count = decision_counter.most_common(1)[0]
+                # if count >= threshold:
+                #     print(f"Threshold reached with decision: {most_common_decision}")
+                #     return most_common_decision, keywords
             
             except Exception as e:
                 print("Error: ", e)
