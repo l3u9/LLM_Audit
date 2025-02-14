@@ -28,14 +28,24 @@ class Client:
         if "Vulnerable" in decision:
             # keywords가 None이 아닌 경우에만 라인 번호 포함하여 처리
             keywords_str = ""
-            for function_info, code_line in keywords:
-                function_name, keyword = function_info  # Function Name과 Keyword 분리
-                keywords_str += f"{function_name} - {keyword} (Code Line {code_line}), "  
+            for entry in keywords:
+                function_info, code_line = entry  # Unpack the tuple into two variables
+                
+                # Now, unpack the first element (function_info) into function_name and keyword
+                if isinstance(function_info, list) and len(function_info) == 2:
+                    function_name, keyword = function_info
+                else:
+                    function_name = "Unknown"
+                    keyword = "No Keywords"
+                
+                keywords_str += f"{function_name} - {keyword} (Code Line: {code_line}), "
 
-            # 마지막 ", " 제거
+            # Remove the trailing comma and space
             keywords_str = keywords_str.rstrip(", ")
 
             result_str = f"Decision: {decision} | Keywords: {keywords_str}"
+            print(result_str)
+
             review = self.auditor.review_vulnerabilities(datas, impacted_function, result_str)
             return review
 

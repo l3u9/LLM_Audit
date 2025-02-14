@@ -114,23 +114,32 @@ class LLMAuditor:
             # 모든 결과가 "Secure"라면 "Secure" 반환
             return "Secure"
 
+
     def _parse_keywords(self, results):
-        """Function, Keywords, Code Line(s)를 추출하여 리스트로 반환"""
-        findings = []
+        """Function, Code Line(s), Keywords를 여러 개 처리하여 리스트로 반환"""
+        # 각 "Result:" 블록을 분리하여 처리
+        result_blocks = re.split(r"\n\nResult:", results)[1:]  # 첫 번째 요소는 공백이므로 무시
         
-        # 여러 개의 결과를 개별적으로 추출
-        matches = re.finditer(
-            r"Function:\s*(.*?)\s*Code Line\(s\):\s*\[(.*?)\]\s*Keywords:\s*(.*)", results, re.DOTALL
-        )
+        parsed_results = []
+        
+        for block in result_blocks:
+            # 개행 문자 제거 및 공백 제거
+            block = block.strip()
+            
+            # Function, Code Line(s), Keywords를 추출
+            function_match = re.search(r"Function:\s*(.*?)\n", block)
+            code_lines_match = re.search(r"Code Line$s$:\s*([^$]+)\n", block)
+            keywords_match = re.search(r"Keywords:\s*(.*?)(?=\nResult:|$)", block, flags=re.DOTALL)
+            
+            function_name = function_match.group(1).strip() if function_match else ""
+            line_numbers = code_lines_match.group(1).strip() if code_lines_match else ""
+            keywords = keywords_match.group(1).strip() if keywords_match else ""
+            
+            # Ensure that the first element is always a list with two elements
+            parsed_results.append(([function_name, keywords], line_numbers))
+        
+        return parsed_results if parsed_results else []
 
-        for match in matches:
-            function_name = match.group(1).strip()
-            line_numbers = match.group(2).strip()
-            keywords = match.group(3).strip()
-
-            findings.append(([function_name, keywords], line_numbers))
-
-        return findings if findings else []  # ✅ 발견된 결과가 없으면 빈 리스트 반환
 
     
     
