@@ -238,7 +238,7 @@ Be sure to follow the output format
         keywords = []
 
         prompt = self.decision_prompt(self.formatting_datas(contracts, impacted_functions))
-        threshold = (self.num_samples // 2) + 1
+        threshold = (self.num_samples // 2) + 2
         print("Prompt: ", prompt)
         for _ in range(self.num_samples):
             try:
