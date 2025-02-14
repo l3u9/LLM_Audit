@@ -24,24 +24,22 @@ class Client:
             impacted_function = None
         
         decision, keywords = self.auditor.decision_vuln(datas, impacted_function)
-        
+        print(keywords)
         if "Vulnerable" in decision:
             # keywords가 None이 아닌 경우에만 라인 번호 포함하여 처리
             keywords_str = ""
-            for entry in keywords:
-                function_info, code_line = entry  # Unpack the tuple into two variables
-                
-                # Now, unpack the first element (function_info) into function_name and keyword
-                if isinstance(function_info, list) and len(function_info) == 2:
-                    function_name, keyword = function_info
-                else:
-                    function_name = "Unknown"
-                    keyword = "No Keywords"
-                
-                keywords_str += f"{function_name} - {keyword} (Code Line: {code_line}), "
+            for li in keywords:
+                for entry in li:
+                    if isinstance(entry, tuple):
 
-            # Remove the trailing comma and space
-            keywords_str = keywords_str.rstrip(", ")
+                        function_info, code_line = entry
+                        
+                        if isinstance(function_info, list):
+
+                            function_name = function_info[0]
+                            keyword = function_info[1] if len(function_info) > 1 else ""
+                            if keyword != "":
+                                keywords_str += f"{function_name} - {keyword} (Code Line: {code_line})\n"
 
             result_str = f"Decision: {decision} | Keywords: {keywords_str}"
             print(result_str)

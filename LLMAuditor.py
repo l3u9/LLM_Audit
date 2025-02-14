@@ -128,17 +128,16 @@ class LLMAuditor:
             
             # Function, Code Line(s), Keywords를 추출
             function_match = re.search(r"Function:\s*(.*?)\n", block)
-            code_lines_match = re.search(r"Code Line$s$:\s*([^$]+)\n", block)
+            code_lines_match = re.search(r"Code Line\(s\):\s*(.*?)(\n|$)", block)  # 수정된 정규표현식
             keywords_match = re.search(r"Keywords:\s*(.*?)(?=\nResult:|$)", block, flags=re.DOTALL)
             
             function_name = function_match.group(1).strip() if function_match else ""
             line_numbers = code_lines_match.group(1).strip() if code_lines_match else ""
             keywords = keywords_match.group(1).strip() if keywords_match else ""
             
-            # Ensure that the first element is always a list with two elements
             parsed_results.append(([function_name, keywords], line_numbers))
         
-        return parsed_results if parsed_results else []
+        return parsed_results
 
 
     
@@ -310,7 +309,7 @@ Result: Secure
                 print("Error: ", e)
 
         # 최종 결과 반환 시 keywords 리스트에서 None 값 제거
-        return collections.Counter(decisions).most_common(1)[0][0], list(filter(None, keywords))
+        return collections.Counter(decisions).most_common(1)[0][0], keywords
     
     # def review_prompt(self, contracts, modifiers, result):
 
