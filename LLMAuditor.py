@@ -108,24 +108,27 @@ class LLMAuditor:
             else:
                 return "Secure"
         return None
-    
+
 
     def _parse_keywords(self, results):
-        match = re.search(r"Keywords:\s*(.*)", results)
+        # Function과 Code Line(s)를 함께 처리하는 정규식
+        match = re.search(r"Function:\s*([^\n]+)\s+Code Line\(s\):\s*\[([^\]]+)\]", results)
+        
         if match:
-            keywords = match.group(1)
+            function_name = match.group(1).strip()  # Function Name 추출 (LiquidProxy를 포함할 수 있도록)
+            line_numbers = match.group(2).split(",")  # 쉼표로 구분된 라인 번호들
+            line_numbers = [line.strip() for line in line_numbers]  # 각 라인 번호에서 공백 제거
             
-            # 'Code Line(s): [Line 3]' 형식에서 라인 번호 파싱
-            line_match = re.search(r"Code Line\(s\): \[([^\]]+)\]", results)
-            if line_match:
-                line_numbers = line_match.group(1).split(",")  # 여러 라인 번호를 쉼표로 구분하여 리스트로 변환
-                line_numbers = [line.strip() for line in line_numbers]  # 불필요한 공백 제거
-                return keywords, line_numbers  # 키워드와 라인번호 리스트 반환
-            
-            return keywords, None
-        return None, None
-
-
+            # Keywords 추출
+            keywords_match = re.search(r"Keywords:\s*(.*)", results)
+            if keywords_match:
+                keywords = keywords_match.group(1).strip()
+                # Function Name을 Keywords의 첫 번째 인덱스로 포함시켜서 반환
+                return [function_name] + [keywords], line_numbers  # Function Name과 Keywords를 포함한 리스트와 Line Numbers 반환
+        
+        return None, None  # 해당 데이터가 없으면 None 반환
+    
+    
     def decision_prompt(self, contracts): 
         cot_prompt = f"""
 You are a senior smart contract security auditor with a track record in Code4rena contest audits. 
