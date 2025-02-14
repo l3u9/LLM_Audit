@@ -132,8 +132,7 @@ class LLMAuditor:
 
 
 
-    def decision_prompt(self, contracts):
-
+    def decision_prompt(self, contracts): 
         cot_prompt = f"""
 You are a senior smart contract security auditor with a track record in Code4rena contest audits. 
 Your task is to analyze the following Solidity smart contracts and identify only vulnerabilities that 
@@ -237,12 +236,13 @@ Result: Secure
 '''
 
 ---
-### 7. Smart Contracts to Audit:
+### 7. Final Output Restriction
+The final answer must include only the final result without any additional explanation or chain-of-thought process.
+
+---
+### 8. Smart Contracts to Audit:
 {contracts}
 """
-
-
-
         return cot_prompt
 
 
