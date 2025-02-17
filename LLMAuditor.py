@@ -213,6 +213,7 @@ Result: Secure
 ### **Strict Output Restrictions**
 - Exclude any additional explanations or reasoning in the final output.
 - All external calls are assumed to be trusted.
+- Never focus Reentrancy,Race Conditions, Integer Overflow/Underflow
 
 ---
 
@@ -251,7 +252,7 @@ Result: Secure
                     "top_p": self.top_p,
                     "stop": None
                 }
-                response = requests.post(self.api_url, json=payload)
+                response = requests.post(self.api_url, json=payload, timeout=60*10)
                 response_text = response.json()["choices"][0]["text"].strip()
                 
                 # decision = self._parse_results(response_text)
