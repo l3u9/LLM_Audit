@@ -263,6 +263,10 @@ Result: Secure
                 if _keywords:  # None이 아닌 경우에만 추가
                     keywords.append(_keywords)
 
+                # if "Secure" length is threshold, return Secure
+                if decisions.count("Secure") >= threshold:
+                    return "Secure", keywords
+
                 print("Decision: ", decision_result)
                 print("Keywords: ", _keywords)
 
