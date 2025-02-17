@@ -252,7 +252,7 @@ Result: Secure
                     "top_p": self.top_p,
                     "stop": None
                 }
-                response = requests.post(self.api_url, json=payload, timeout=60*10)
+                response = requests.post(self.api_url, json=payload, timeout=60*5)
                 response_text = response.json()["choices"][0]["text"].strip()
                 
                 # decision = self._parse_results(response_text)
