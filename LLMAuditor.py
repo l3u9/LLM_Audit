@@ -144,93 +144,87 @@ class LLMAuditor:
     
     def decision_prompt(self, contracts): 
         cot_prompt = f"""
-You are a senior smart contract security auditor with extensive experience in Code4rena contest audits. 
-Your task is to analyze the following Solidity smart contracts and identify vulnerabilities that are 
-realistically exploitable (Medium or High risk). Do NOT report theoretical or highly improbable issues.
+You are a senior smart contract security auditor with extensive experience in Code4rena contest audits.
+Your task is to analyze the following Solidity smart contracts and identify vulnerabilities that are realistically exploitable (Medium or High risk). Do NOT report theoretical or highly improbable issues.
 
 ---
-### Enhanced Analysis Process (Chain-of-Thought Approach)
-Follow these four steps to ensure the detection of logical, contextual, and implementation flaws:
 
-### 1. **Function Intent & Implementation Validation**
-   - Identify each function’s intended purpose, expected inputs/outputs, and expected state transitions.
-   - Check for misalignments between intent and implementation, including logic bugs, incorrect conditions, 
-     and unintended state modifications.
-   - Assess whether loop behaviors, execution order, and branching logic create exploitable vulnerabilities.
+### **Chain-of-Thought Approach**
+Follow this structured approach to ensure comprehensive analysis:
 
-### 2. **Inter-Function & State Dependency Analysis**
-   - Evaluate how each function modifies the contract’s state and how these state changes impact other functions.
-   - Identify if state transitions create inconsistencies, unexpected privileges, or unintended function behavior.
-   - Analyze whether chaining function calls can lead to privilege escalation, unauthorized state modifications, 
-     or asset compromise.
+1. **Function Analysis & Variable Relationship Mapping:**
+   - **Intent & Implementation Validation:** 
+     - Identify each function’s purpose, expected inputs/outputs, and state transitions.
+     - Check for logic bugs, incorrect conditions, or unintended state changes.
+     - Assess loop behavior, execution order, and branching logic for potential vulnerabilities.
+   - **Variable Relationship Mapping:**
+     - Identify how variables are related based on naming patterns.
+     - Check if the same variable is used across multiple function calls with different expected behaviors.
+     - Analyze whether arguments passed to a function share a logical dependency that could be violated.
 
-### 3. **Contextual & Business Logic Vulnerability Assessment**
-   - Verify that all operations align with their expected business logic and contract context.
-   - Identify logical inconsistencies in how values are stored, modified, or transferred.
-   - Detect flawed access control mechanisms, unsafe assumptions, and unintended execution paths.
+2. **Inter-Function Dependencies & Repetitive Patterns:**
+   - Analyze how functions modify the contract's state and impact each other.
+   - Identify if chaining function calls leads to privilege escalation or unauthorized access.
+   - Check if errors in one function cause unintended state corruption elsewhere.
+   - Detect repeated function calls with similar arguments but different contexts to find inconsistencies.
 
-### 4. **Realistic Exploitation & Attack Path Construction**
-   - Construct plausible attack paths that leverage discovered vulnerabilities.
-   - Confirm that the identified issues lead to tangible exploitability (financial loss, unauthorized access, 
-     or state corruption) under practical conditions.
-   - Avoid reporting vulnerabilities that require highly improbable execution conditions.
+3. **Business Logic & Contextual Analysis:**
+   - Verify that operations align with expected business logic.
+     - Ensure that function arguments are used correctly and consistently (e.g., tokens, prices, addresses).
+     - Detect inconsistencies, flawed access controls, or overlooked edge cases.
+     - Look for unintended behaviors caused by incorrect value storage or transfers.
+   - **Data Flow Tracking:**
+     - Check how a variable’s value changes throughout function execution.
+     - Identify cases where an argument affects different parts of the contract in inconsistent ways.
+     - Ensure that values passed between functions maintain their expected logical relationships.
 
----
-### **Key Areas of Focus for Logical, Contextual, and Implementation Bugs**
-#### **Logical Bugs (Flaws in Execution & Conditional Logic)**
-   - Incorrect condition checks leading to unauthorized access or unintended behavior.
-   - Misconfigured loops, incorrect iteration logic, or flawed function execution sequences.
-   - Unintended behaviors due to misplaced or missing return statements.
-
-#### **Contextual Bugs (Misalignment Between Intent & Code Execution)**
-   - Business logic flaws where expected outcomes do not match real execution.
-   - Unhandled edge cases, incomplete access control, or overlooked execution scenarios.
-   - State inconsistencies due to unexpected contract interactions or external dependencies.
-
-#### **Implementation Bugs (Directly Exploitable Vulnerabilities)**
-   - Insecure state changes that allow unauthorized modifications or fund theft.
-   - Flawed access control leading to privilege escalation or asset loss.
-   - Critical execution flaws that allow unintended manipulation of contract logic.
+4. **Exploitation Path Construction:**
+   - Construct realistic attack paths leveraging identified vulnerabilities.
+   - Only report issues with tangible exploitability under practical conditions.
 
 ---
-### **Strict Risk Classification**
-Only classify vulnerabilities if they meet realistic attack criteria.
 
-#### **High Risk:**
-- Flaws that directly enable fund theft, permanent loss, or unauthorized control.
-- Bugs that could cause significant financial impact or render the contract unusable.
-
-#### **Medium Risk:**
-- Issues that disrupt core functionality or introduce potential fund leaks.
-- State inconsistencies that could lead to privilege escalation under realistic conditions.
+### **Key Areas of Focus**
+- **Logical Bugs:** Incorrect condition checks, flawed loops, or misplaced returns causing unintended behavior.
+- **Contextual Bugs:** Misaligned intent with execution, unhandled edge cases, or access control flaws.
+- **Implementation Bugs:** Directly exploitable vulnerabilities like insecure state changes or privilege escalation.
+- **Variable Relationship Inconsistencies:**
+  - Detect cases where the same variable is used inconsistently across multiple function calls.
+  - Identify instances where logically linked variables (e.g., `indexToken` and `indexTokenPrice`) are handled in a conflicting manner.
+  - Verify that function arguments maintain their expected relationships across all interactions.
 
 ---
-### **Result Output Format**
-- If the contract has a **High risk vulnerability**:
+
+### **Output Format**
+
+
+- If a vulnerability exists:
 '''
-Result: Vulnerable - High Risk, Keywords: [Identified Vulnerability]
+Result: Vulnerable , Keywords: [Vulnerability Identified]
 '''
 
-- If the contract has a **Medium risk vulnerability**:
-'''
-Result: Vulnerable - Medium Risk, Keywords: [Identified Vulnerability]
-'''
-
-- If the contract has no Medium or High risk vulnerabilities:
+- If no vulnerabilities are found:
 '''
 Result: Secure
 '''
 
 ---
-### **Strict Output Restriction**
-- The final output must contain only the result without any additional explanation or reasoning.
-- Only report issues if they are realistically exploitable.
-- Assume external calls are made to trusted entities.
+
+### **Strict Output Restrictions**
+- Exclude any additional explanations or reasoning in the final output.
+- All external calls are assumed to be trusted.
 
 ---
+
 ### **Smart Contracts to Audit:**
 {contracts}
 """
+
+
+
+
+
+
 
 
         return cot_prompt
