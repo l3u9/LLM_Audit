@@ -151,112 +151,109 @@ theoretical or unlikely to be triggered, and do NOT provide any recommendations 
 
 ---
 ### Analysis Process (Chain-of-Thought Approach)
-Follow these structured steps to ensure accurate vulnerability identification:
+Please follow these three steps in your analysis:
 
-1. **Step 1: Identify Each Function's Intent & Expected Behavior**
-   - For **each** function (Entry, Dependent, or Impacted), determine its intended purpose, 
-     expected inputs/outputs, and expected state changes.
-   - Check if the actual implementation aligns with this intended behavior.
-   - Look for access control misconfigurations, improper parameter validation, or unintended 
-     side effects that could introduce vulnerabilities.
+1. **Step 1: Identify Each Function's Intent**
+   - For each function, clarify its intended purpose (business logic), expected inputs/outputs, 
+     and the state changes it is supposed to make.
+   - Check if the actual code aligns with this intention. Look for any logic or implementation bugs 
+     that deviate from the function's intended behavior.
 
-2. **Step 2: Evaluate Cross-Function Interactions & State Modifications**
-   - Analyze how Entry/Dependent functions modify the contract state and determine if any function 
-     call sequences can lead to incorrect or maliciously exploitable states.
-   - If a bug in one function (e.g., missing access checks) propagates to another function, 
-     explain how it can be exploited in practice.
-   - Check whether external calls combined with state changes result in security flaws.
+2. **Step 2: Determine Impact on Other Functions**
+   - Investigate whether the identified bugs or inconsistencies in Step 1 can affect other functions. 
+   - Analyze how state changes or data flows from one function might introduce vulnerabilities in 
+     other parts of the contract (impacted functions).
+   - Consider if chaining these functions could lead to privilege escalation, unintended state manipulation, 
+     or asset compromise.
 
-3. **Step 3: Construct Realistic Attack Scenarios**
-   - Identify clear, practical attack paths that an adversary could exploit.
-   - Ensure that vulnerabilities classified as Medium or High risk are **demonstrably exploitable** 
-     under real-world conditions.
-   - If an issue is identified but lacks a direct attack vector, it should **not** be classified as Medium/High risk.
+3. **Step 3: Evaluate Realistic Attack Paths**
+   - Assess if the issues found in Steps 1 and 2 can be combined into a concrete, practical attack path. 
+   - Only classify a vulnerability as Medium or High risk if there is a clear, demonstrable way 
+     for an attacker to exploit it under typical conditions.
+
+**Important Notes:**
+- Reentrancy vulnerabilities must NOT be considered or reported under any circumstances.
+- Race Condition vulnerabilities must NOT be considered unless they have a demonstrable attack path that has been exploited in real-world Code4rena contests.
+- Integer underflow/overflow vulnerabilities must NOT be reported unless they are practically exploitable within the given Solidity version (e.g., pre-0.8.x without SafeMath).
+- Use historical Code4rena audit examples as a reference to ensure reported issues have a realistic attack path.
+- Focus on business logic errors, flawed state transitions, access control oversights, 
+  and data flow inconsistencies that are practically exploitable.
+- **Assumption: All external calls in the contract are made to trusted entities and cannot be exploited.**  
 
 ---
 ### 1. Smart Contract Security & Logic Analysis
-Examine how functions modify the contract state and whether function calls can be chained to cause unintended 
+Examine how functions modify the contract state and whether chaining function calls could lead to unintended 
 side effects, privilege escalations, or asset compromise.
 
 #### Key Areas to Focus On:
-- How do different functions modify the contract state, and can these state changes be exploited across calls?
-- Identify execution sequences that could result in unintended asset compromise or functional disruptions.
-- Evaluate whether interactions between functions introduce vulnerabilities that may not be apparent in isolation.
-- Assess external calls within function execution and determine if they introduce exploitable attack vectors.
+- How do different functions modify the contract state, and can these state changes be chained 
+  to create exploitable conditions?
+- Identify specific execution sequences that lead to unintended side effects or asset compromise.
+- Evaluate if state transitions in one function create vulnerabilities in other functions 
+  that can be realistically exploited.
+- Assess external calls in combination with other operations to determine if they yield tangible attack vectors.
 
 ---
 ### 2. Logical Consistency & Business Logic Validation
-- Validate that function logic aligns with its intended purpose.
+- Validate that each function's logic aligns with its intended purpose.
 - Confirm that inputs and outputs are processed correctly without hidden exploitation opportunities.
-- Scrutinize loops, iteration behavior, and execution order to uncover logical flaws.
-- Any vulnerability reported must have a **clear, feasible attack path**, comparable to past Code4rena findings.
+- Scrutinize loops, iteration behaviors, and execution order to uncover exploitable flaws.
+- Ensure that any vulnerability reported has a clear, feasible attack path reminiscent 
+  of past Code4rena findings.
 
 ---
 ### 3. Realistic Exploitation & Attack Scenarios
 For every identified issue, ensure that:
-- It can be **realistically exploited** under typical contract conditions.
-- It is **not dependent on highly unlikely edge cases** or unrealistic attacker setups.
-- It leads to **tangible security risks**, such as financial loss, unauthorized access, or contract state manipulation.
+- The vulnerability can be chained with other contract behaviors to yield a realistic attack scenario.
+- The exploit is practical under real-world conditions without relying on contrived circumstances.
+- The identified risk leads to tangible outcomes (e.g., financial loss, unauthorized control, or critical state manipulation).
+
+Only report vulnerabilities that have a clear, demonstrable attack path. 
+If an issue is purely theoretical or cannot be practically triggered, do not classify it as Medium or High risk.
 
 ---
-### 4. Handling Reentrancy & State Manipulation
-- **Do NOT report reentrancy vulnerabilities** unless they introduce broader **state manipulation risks**.
-- If an external call results in unintended contract state changes, it **must be analyzed** for potential impact.
-- Any issue related to **unexpected state transitions** or **cross-function exploits** should be included.
+### 4. Preventing False Secure Classification
+A contract should be classified as "No Critical Vulnerabilities Found" only if:
+1. There are absolutely no business logic errors, state inconsistencies, or exploitable data flow issues.
+2. Every function has been thoroughly evaluated for realistic attack scenarios.
+3. All potential vulnerabilities have been cross-verified against practical exploitation conditions 
+   seen in prior contest audits.
 
 ---
-### 5. Preventing False Secure Classification
-A contract should only be classified as **"Secure"** if:
-1. No exploitable business logic errors, state inconsistencies, or access control flaws exist.
-2. All provided functions have been thoroughly analyzed for realistic attack paths.
-3. Any minor inconsistencies do **not** result in significant security risks.
-
----
-### 6. Risk Classification
+### 5. Risk Classification
 #### Medium Risk:
-- Vulnerabilities where assets are **not immediately at risk** but **realistic exploitation** 
-  could cause disruptions, financial losses, or privilege escalations.
-- Issues that require **plausible attack conditions** to manifest.
+- Vulnerabilities where assets are not immediately at risk but realistic exploitation 
+  could disrupt functionality or leak value.
+- Issues that may manifest only under specific, plausible attack conditions.
 
 #### High Risk:
-- Vulnerabilities that **directly** enable asset theft, loss, or unauthorized control.
-- Flaws that can result in **significant financial loss** or complete contract compromise 
-  under normal operating conditions.
+- Vulnerabilities that directly allow asset theft, loss, or unauthorized control.
+- Flaws that could lead to significant financial loss or complete contract compromise 
+  under demonstrable, real-world conditions.
 
 ---
-### 7. Result Output Format (Includes Code Line Information)
-Each identified vulnerability must include the **affected function name and the exact line number(s)** 
-where the issue occurs.  
-
-If the contract has a **High risk vulnerability**:
+### 6. Result Output Format
+- If the contract has a **High risk vulnerability**:
 '''
-Result: Vulnerable - High Risk  
-Function: <Function Name>  
-Code Line(s): [Line Numbers]  
-Keywords: [Identified Vulnerability Here]  
+Result: Vulnerable - High Risk, Keywords: [All of Your Identified Vulnerability Here]
 '''
 
-If the contract has a **Medium risk vulnerability**:
+- If the contract has a **Medium risk vulnerability**:
 '''
-Result: Vulnerable - Medium Risk  
-Function: <Function Name>  
-Code Line(s): [Line Numbers]  
-Keywords: [Identified Vulnerability Here]  
+Result: Vulnerable - Medium Risk, Keywords: [All of Your Identified Vulnerability Here]
 '''
 
-If the contract has no **Medium or High risk vulnerabilities**, but minor issues exist:
+- If the contract has no high-risk vulnerabilities but might still have minor issues:
 '''
-Result: Secure  
+Result: Secure
 '''
 
 ---
-### 8. Final Output Restriction
-- The final output **must only contain the final result** as per the format above.
-- **Do not provide any chain-of-thought explanation or reasoning in the final output.**
-- However, internally, you must perform structured reasoning to ensure accurate vulnerability classification.
+### 7. Final Output Restriction
+The final answer must include only the final result without any additional explanation or chain-of-thought process.
 
 ---
-### 9. Smart Contracts to Audit:
+### 8. Smart Contracts to Audit:
 {contracts}
 """
 
