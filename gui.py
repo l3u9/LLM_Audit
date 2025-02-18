@@ -162,6 +162,11 @@ class SmartContractAnalyzer(QWidget):
         main_layout.addWidget(self.uploaded_contracts)
         main_layout.addWidget(self.button_upload)
 
+        # 폴더 내 컨트랙트 업로드 버튼 추가
+        self.button_upload_folder = QPushButton("Upload Contract Folder", self)
+        self.button_upload_folder.clicked.connect(self.upload_contract_folder)
+        main_layout.addWidget(self.button_upload_folder)
+
         # 컨트랙트 선택 리스트 (QComboBox)
         self.label_contract_select = QLabel("Select Contract:")
         self.contract_select = QComboBox(self)
@@ -194,7 +199,7 @@ class SmartContractAnalyzer(QWidget):
         main_layout.addWidget(self.button_analyze_all_functions)
 
         # 보고서 저장 경로 선택 버튼
-        self.button_set_save_path = QPushButton("Set Report Save Path")
+        self.button_set_save_path = QPushButton("Set Report Save Path", self)
         self.button_set_save_path.clicked.connect(self.set_save_path)
         main_layout.addWidget(self.button_set_save_path)
 
@@ -254,9 +259,30 @@ class SmartContractAnalyzer(QWidget):
             self.uploaded_contracts.clear()
             for file in self.uploaded_files:
                 self.uploaded_contracts.addItem(file)
+            # Client를 통해 컨트랙트 로드
             self.client.load_contracts(self.uploaded_files)
             self.update_contract_list()
             QMessageBox.information(self, "Success", "Smart contract files uploaded successfully!")
+
+    def upload_contract_folder(self):
+        # 선택한 폴더 및 하위 폴더 내의 모든 .sol 파일 검색
+        folder = QFileDialog.getExistingDirectory(self, "Select Folder Containing Contracts")
+        if folder:
+            contract_files = []
+            for root, dirs, files in os.walk(folder):
+                for file in files:
+                    if file.endswith(".sol"):
+                        contract_files.append(os.path.join(root, file))
+            if contract_files:
+                self.uploaded_files = contract_files
+                self.uploaded_contracts.clear()
+                for file in contract_files:
+                    self.uploaded_contracts.addItem(file)
+                self.client.load_contracts(contract_files)
+                self.update_contract_list()
+                QMessageBox.information(self, "Success", "모든 스마트 컨트랙트 파일이 성공적으로 업로드되었습니다!")
+            else:
+                QMessageBox.warning(self, "Warning", "선택한 폴더 내에 Solidity 파일이 없습니다.")
 
     def update_contract_list(self):
         self.contract_select.clear()
@@ -313,7 +339,6 @@ class SmartContractAnalyzer(QWidget):
         worker.signals.error.connect(self.handle_worker_error)
         self.threadpool.start(worker)
 
-    # 분석 함수: 진행 상황과 취소 여부를 체크 (is_cancelled 사용)
     def _analyze_all_contracts(self, progress_callback, is_cancelled):
         contracts = self.client.manager.get_contract_names()
         total = sum(len(self.client.manager.get_contract_info(contract)["Functions"]) for contract in contracts)
