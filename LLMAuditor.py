@@ -13,35 +13,6 @@ class LLMAuditor:
         self.top_p = top_p
         self.num_samples = num_samples  # Self-Consistency 적용
 
-    # def formatting_datas(self, datas, modifiers):
-        
-    #     # enumerate loop using dict
-    #     formatted = ""
-
-    #     for i, (key, value) in enumerate(modifiers.items()):
-    #         formatted += f"#### Modifier Function {i}\n\n"
-    #         formatted += f"Contract Name: {key}\n\n"
-    #         formatted += "\n\nFunction Code: \n"
-    #         formatted += "\n".join(value)
-
-    #     for i, (key, value) in enumerate(datas.items()):
-
-    #         if i == 0:
-    #             formatted += "#### Entry Function\n\n"
-    #             formatted += f"Contract Name: {key}\n\n"
-    #             for val in value:
-    #                 formatted += "\n\nFunction Code: \n"
-    #                 formatted += "\n".join(val)
-    #         else:
-    #             formatted += f"\n\n#### Dependent Function {i}\n\n"
-    #             formatted += f"Contract Name: {key}\n\n"
-    #             for val in value:
-    #                 formatted += "\n\nFunction Code: \n"
-    #                 formatted += "\n".join(val)
-
-
-    #     return formatted
-    
     def set_api_ip(self, api_ip):
         self.api_url = f"http://{api_ip}:1234/v1/completions"
 
@@ -150,7 +121,7 @@ Your task is to analyze the following Solidity smart contracts and identify vuln
 ---
 
 ### **Chain-of-Thought Approach**
-Follow this structured approach to ensure comprehensive analysis:
+Follow this structured approach to ensure comprehensive analysis. **Note: Do NOT consider or report any vulnerabilities related to Reentrancy, Race Conditions, or Integer Overflow/Underflow at any stage of the analysis.**
 
 1. **Function Analysis & Variable Relationship Mapping:**
    - **Intent & Implementation Validation:** 
@@ -197,7 +168,6 @@ Follow this structured approach to ensure comprehensive analysis:
 
 ### **Output Format**
 
-
 - If a vulnerability exists:
 '''
 Result: Vulnerable , Keywords: [Vulnerability Identified]
@@ -213,13 +183,14 @@ Result: Secure
 ### **Strict Output Restrictions**
 - Exclude any additional explanations or reasoning in the final output.
 - All external calls are assumed to be trusted.
-- Never focus Reentrancy,Race Conditions, Integer Overflow/Underflow
+- **Do NOT consider or report any vulnerabilities related to Reentrancy, Race Conditions, or Integer Overflow/Underflow under any circumstances.**
 
 ---
 
 ### **Smart Contracts to Audit:**
 {contracts}
 """
+
 
 
 
@@ -295,6 +266,8 @@ Result: Secure
         _review_prompt = f"""
 You are a **senior smart contract security reviewer**. Your task is to **verify the vulnerabilities identified by the initial security audit (Auditor)** and determine whether they are **valid**. Your analysis should go beyond theoretical concerns and focus on **realistic exploitability, access control, and system impact**.
 
+**Note: Do NOT consider or report any vulnerabilities related to Reentrancy, Race Conditions, or Integer Overflow/Underflow at any stage of your review.**
+
 ---
 
 ### 1. Audit Report from Security Analyst
@@ -307,28 +280,33 @@ These vulnerabilities were flagged as **potential security risks**. Note that th
 ---
 
 ### 2. Reviewer Objectives
-Your role as a **security reviewer** is to analyze the vulnerabilities from three different perspectives:
+Your role as a **security reviewer** is to re-assess the reported vulnerabilities using a structured analysis approach similar to the initial audit, with a focus on the following areas:
 
-- 🔹 **Code Logic Bug:**  
-  - Is there an internal logic error causing unintended behavior?
-  - Could the code execute incorrectly due to an implementation flaw?
+- **Function & Variable Relationship Validation:**  
+  - Confirm that each function behaves as intended, with correct input/output relationships and state transitions.
+  - Verify that variables are used consistently across function calls and maintain their logical relationships.
 
-- 🔹 **Business Logic Bug:**  
-  - Does the function fail to achieve its intended protocol behavior?
-  - Could an attacker **abuse contract functionality** to gain an unfair advantage?
-  - Are incentives misaligned, potentially leading to unintended financial gain?
+- **Inter-Function Dependency & Pattern Consistency:**  
+  - Evaluate how functions interact and modify contract state to ensure that reported issues persist in the overall context.
+  - Identify any discrepancies in repeated patterns that could impact exploitability.
 
-- 🔹 **System Bug:**  
-  - Can this vulnerability be exploited to **affect protocol security or stability**?
-  - Do external dependencies (oracles, external calls, state updates) introduce a critical issue?
-  - Could this issue create **network-wide disruptions or systemic risks**?
+- **Business Logic & Contextual Consistency:**  
+  - Assess whether the function’s behavior aligns with the intended protocol logic and business requirements.
+  - Determine if the reported vulnerabilities could realistically be exploited to cause financial loss or systemic disruption.
 
-**If a function is controlled by a trusted entity, assume they do not act maliciously and adjust risk classification accordingly.**
+- **Exploitation Path Assessment:**  
+  - Analyze and confirm the existence of practical attack paths based on the flagged vulnerabilities.
+  - Focus on realistic scenarios that highlight tangible risks and potential damage.
+
+- **Access Control & Trusted Entity Evaluation:**  
+  - Review modifiers and require statements to confirm who can execute the function.
+  - Determine if trusted entities are involved and if their presence mitigates the reported risk.
 
 ---
 
 ### 3. Smart Contract for Review
 Below is the smart contract code that must be reviewed:
+
 
 ```solidity
 {formatted_contracts}
