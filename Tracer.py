@@ -148,7 +148,12 @@ class Tracer:
         _modified_state_vars = self._get_traced_contract_modified_state_vars(contracts_and_functions)
 
         _modifiers = self._get_traced_contract_modifiers(contracts_and_functions)
-        contracts_and_functions.popitem(last=False)
+
+        first_key = next(iter(contracts_and_functions))  # OrderedDict의 첫 번째 키 가져오기
+
+        # 첫 번째 키의 리스트에서 첫 번째 값 pop
+        if contracts_and_functions[first_key]:  # 리스트가 비어있지 않은 경우만 pop 수행
+            contracts_and_functions[first_key].pop(0)
 
         return _code_dict, contracts_and_functions, _modified_state_vars, _modifiers
 
@@ -172,11 +177,7 @@ class Tracer:
 
                 for function in functions:
                     _data, _ret, _modified, _modifiers = self.trace_function(dic, function)
-                
-
-                    # Debugging: Check changes before updating datas
-                    datas_backup = deepcopy(datas)
-                    
+                                    
                     # Ensure _data is a dictionary before updating
                     if isinstance(_data, dict):
                         for key, value in _data.items():
@@ -199,10 +200,12 @@ class Tracer:
                     impacted_functions.update(_impacted)
 
 
-                    if isinstance(_ret, dict):
-                        ret.update(_ret)
-                    else:
-                        pass
+                    if _ret:
+                        for key in _ret:
+                            if key in ret:
+                                ret[key].extend(_ret[key])
+                            else:
+                                ret[key] = _ret[key]
 
             temp = deepcopy(ret)
 
