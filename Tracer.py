@@ -40,19 +40,12 @@ class Tracer:
 
 
             for function in function_name:
-
                 function_codes = self.contract_manager.get_function_code(contract_name, function)
-
-
-
                 if contract_name not in contract_codes:
                     contract_codes[contract_name] = []
 
                 for code in function_codes:
                     contract_codes[contract_name].append(code)                
-
-
-
         return contract_codes
     
     def _get_traced_contract_modified_state_vars(self, dicts):
@@ -61,8 +54,6 @@ class Tracer:
         for contract_name in dicts:
             function_name = dicts[contract_name]
             for function in function_name:
-
-
                 modified_state_vars = self.contract_manager.get_functions_modified_state_vars(contract_name, function)
 
                 if contract_name not in contract_modified_state_vars:
@@ -104,8 +95,7 @@ class Tracer:
 
 
 
-
-        contract_names = self.contract_manager.get_contract_names()
+        # contract_names = self.contract_manager.get_contract_names()
 
         contracts_and_functions = OrderedDict()
 
@@ -114,33 +104,18 @@ class Tracer:
 
         if internal_calls:
             for calls in internal_calls:
-                for internal_call in calls:
-                    for _contract_name in contract_names:
-                        
-
-
-                        _contract_name = _contract_name
-
-                        function_names = self.contract_manager.get_function_names(_contract_name)
-
-
-
-                        if internal_call in function_names:
-                            if _contract_name not in contracts_and_functions:
-                                contracts_and_functions[_contract_name] = []
-                            contracts_and_functions[_contract_name].append(internal_call)
-                            break
+                for function_name in calls:
+                    function_names = self.contract_manager.get_function_names(contract_name)
+                    if function_name in function_names:
+                        if contract_name not in contracts_and_functions:
+                            contracts_and_functions[contract_name] = []
+                        contracts_and_functions[contract_name].append(function_name)
 
         if external_calls:
             for external_call in external_calls:
                 for interface_name in external_call:
 
                     _contract_name = interface_name[1:] if interface_name[0] == 'I' else interface_name
-
-                    # if contract_name first letter is not capital, then only change first letter to capital
-                    # if contract_name[0] not in string.ascii_uppercase:
-                    #     contract_name = contract_name[0].upper() + contract_name[1:]
-
 
                     for function_name in external_call[interface_name]:
 
@@ -153,87 +128,31 @@ class Tracer:
                                 contracts_and_functions[_contract_name] = []
                             contracts_and_functions[_contract_name].append(function_name)
 
+
+
         if view_pure_calls:
             for view_pure_call in view_pure_calls:
-                for _contract_name in contract_names:
-                    _contract_name = _contract_name
-                    function_names = self.contract_manager.get_function_names(_contract_name)
-                    if view_pure_call in function_names:
-                        if _contract_name not in contracts_and_functions:
-                            contracts_and_functions[_contract_name] = []
-                        contracts_and_functions[_contract_name].append(view_pure_call)
-                        break
+                for function_name in view_pure_call:
+                    function_names = self.contract_manager.get_function_names(contract_name)
+                    if function_name in function_names:
+                        if contract_name not in contracts_and_functions:
+                            contracts_and_functions[contract_name] = []
+                        contracts_and_functions[contract_name].append(function_name)
 
         _code_dict = OrderedDict()
         _modified_state_vars = OrderedDict()
         _modifiers = OrderedDict()
-        # _impacted_functions = OrderedDict()
 
         _code_dict = self._get_traced_contract_codes(contracts_and_functions)
 
         _modified_state_vars = self._get_traced_contract_modified_state_vars(contracts_and_functions)
 
         _modifiers = self._get_traced_contract_modifiers(contracts_and_functions)
-
-        # contracts_and_functions.popitem(last=False)
-
-
-        # 첫 번째 키 동적으로 선택
-        first_key = next(iter(contracts_and_functions))  # OrderedDict의 첫 번째 키 가져오기
-
-        # 첫 번째 키의 리스트에서 첫 번째 값 pop
-        if contracts_and_functions[first_key]:  # 리스트가 비어있지 않은 경우만 pop 수행
-            contracts_and_functions[first_key].pop(0)
-        
+        contracts_and_functions.popitem(last=False)
 
         return _code_dict, contracts_and_functions, _modified_state_vars, _modifiers
 
-    # def trace_function_with_depth(self, contract_name, function_name, depth=3):
-    #     datas, dicts, modifieds, modifiers = self.trace_function(contract_name, function_name)
 
-    #     impacted_functions = OrderedDict()
-    #     _impacted = self.contract_manager.get_impacted_modified_state_vars(modifieds)
-
-
-        
-    #     impacted_functions.update(_impacted)
-    #     temp = deepcopy(dicts)
-        
-    #     for i in range(depth-1):
-    #         ret = {}
-
-    #         for dic in temp:
-    #             functions = temp[dic]
-
-    #             for function in functions:
-    #                 _data, _ret, _modified, _modifiers = self.trace_function(dic, function)
-    #                 print("_ret: ", _ret)
-    #                 datas.update(_data)
-    #                 modifieds.update(_modified)
-    #                 modifiers.update(_modifiers)
-    #                 _impacted = self.contract_manager.get_impacted_modified_state_vars(modifieds)
-    #                 impacted_functions.update(_impacted)
-    #                 ret.update(_ret)
-    #                 print("updated ret: ", ret)
-    #                 print("=====================================")
-    #                 print("updated datas: ", datas)
-    #         print("ret: ", ret)
-    #         temp = deepcopy(ret)
-
-            
-
-    #     modifier_codes = {}
-    #     for modifier in modifiers:
-    #         modifier_code = self.contract_manager.get_modifier_code(modifier, modifiers[modifier])
-    #         if modifier_code == None:
-    #             continue
-    #         modifier_codes[modifier] = modifier_code
-
-
-    #     impacted_functions = self._remove_duplicate_values(impacted_functions, datas)
-
-        
-    #     return datas, modifieds, modifier_codes, impacted_functions
 
     def trace_function_with_depth(self, contract_name, function_name, depth=3):
         datas, dicts, modifieds, modifiers = self.trace_function(contract_name, function_name)
@@ -295,7 +214,6 @@ class Tracer:
             modifier_codes[modifier] = modifier_code
 
         impacted_functions = self._remove_duplicate_values(impacted_functions, datas)
-        print("impacted_functions: ", impacted_functions)
         datas = self._remove_dup(datas)
         return datas, modifieds, modifier_codes, impacted_functions
 
