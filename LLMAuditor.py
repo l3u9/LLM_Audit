@@ -407,7 +407,7 @@ Ensure that your final report is **accurate and based on real security risks**.
                 "top_p": self.top_p,
                 "stop": None
             }
-            response = requests.post(self.api_url, json=payload)
+            response = requests.post(self.api_url, json=payload, timeout=60*5)
             response.raise_for_status()
             result = response.json()["choices"][0]["text"].strip()
 
