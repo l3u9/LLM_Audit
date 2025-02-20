@@ -190,7 +190,7 @@ Follow this structured approach to ensure comprehensive analysis:
 - **Implementation Bugs:** Directly exploitable vulnerabilities like insecure state changes or privilege escalation.
 - **Variable Relationship Inconsistencies:**
   - Detect cases where the same variable is used inconsistently across multiple function calls.
-  - Identify instances where logically linked variables (e.g., `indexToken` and `indexTokenPrice`) are handled in a conflicting manner.
+  - Identify instances where logically linked variables are handled in a conflicting manner.
   - Verify that function arguments maintain their expected relationships across all interactions.
 
 ---
