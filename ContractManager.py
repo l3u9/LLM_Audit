@@ -74,31 +74,21 @@ class ContractManager:
         if not functions:
             return None
         
-        # internal_calls = [
-        #     function["Function Calls"]["Internal Functions"]
-        #     for function in functions
-        # ]
         internal_calls = []
         for function in functions:
             internal_calls.append(function["Function Calls"]["Internal Functions"])
-        # internal_calls = functions[0]["Function Calls"]["Internal Functions"]
         return internal_calls
     
     def get_functions_external_calls(self, contract_name, function_name):
         functions = self._select_contract_function(contract_name, function_name)
         if not functions:
             return None
-        
-        # external_calls = [
-        #     function["Function Calls"]["External Interface Calls"]
-        #     for function in functions
-        # ]
+
         external_calls = []
         for function in functions:
             external_calls.append(function["Function Calls"]["External Interface Calls"])
 
 
-        # external_calls = functions[0]["Function Calls"]["External Interface Calls"]
 
         return external_calls
     
@@ -107,10 +97,6 @@ class ContractManager:
         if not functions:
             return None
         
-        # view_pure_calls = [
-        #     function["Function Calls"]["View/Pure Calls"]
-        #     for function in functions
-        # ]
         view_pure_calls = []
         for function in functions:
             view_pure_calls.append(function["Function Calls"]["View/Pure Calls"])
@@ -122,10 +108,6 @@ class ContractManager:
         if not functions:
             return None
         
-        # modified_state_vars = [
-        #     function["Modified State Variables"]
-        #     for function in functions
-        # ]
 
         modified_state_vars = []
         for function in functions:
@@ -196,7 +178,6 @@ class ContractManager:
 
         impacted_modified_state_vars = {}
 
-        # output: state_vars:  {'LiquidRon': ['operatorFeeAmount'], 'LiquidProxy': [], 'RonHelper': []}
         for contract_name in state_vars:
             contract_info = self.get_contract_info(contract_name)
             if not contract_info:
