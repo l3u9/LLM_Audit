@@ -12,6 +12,12 @@ class LLMAuditor:
         self.temperature = temperature
         self.top_p = top_p
         self.num_samples = num_samples  # Self-Consistency 적용
+        self.messages = [
+            {
+                "role": "system",
+                "content": "You are a senior smart contract security auditor with extensive experience in Code4rena contest audits. Do not analyze Reentrancy, Race Conditions, or Integer Overflow/Underflow."
+            }
+        ]
 
     def set_api_ip(self, api_ip):
         self.api_url = f"http://{api_ip}:1234/v1/completions"
@@ -212,10 +218,11 @@ Result: Secure
         prompt = self.decision_prompt(self.formatting_datas(contracts, impacted_functions))
         threshold = (self.num_samples // 2) + 1
         print("Prompt: ", prompt)
-
+        
         for _ in range(self.num_samples):
             try:
                 payload = {
+                    "messages": self.messages,
                     "model": self.model,
                     "prompt": prompt,
                     "max_tokens": self.max_tokens,
@@ -378,6 +385,7 @@ Ensure that your final report is **accurate and based on real security risks**.
             responses = []
 
             payload = {
+                "messages": self.messages,
                 "model": self.model,
                 "prompt": prompt,
                 "max_tokens": self.max_tokens,
