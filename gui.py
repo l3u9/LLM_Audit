@@ -316,28 +316,39 @@ class SmartContractAnalyzer(QWidget):
         if len(selected_contracts) != 1:
             QMessageBox.warning(self, "Warning", "단일 함수 분석은 정확히 1개의 컨트랙트를 선택해야 합니다.")
             return
-        contract_name = selected_contracts[0]
-        function_name = self.function_select.currentText()
-        depth = self.spinbox_depth.value()
-        if not contract_name or not function_name:
-            QMessageBox.warning(self, "Warning", "컨트랙트와 함수를 선택해 주세요.")
-            return
         self.result_text.setText("🔍 Analyzing... Please wait.")
-        worker = CancellableWorker(self.client.analyze_and_review, contract_name, function_name, depth, self.impact_checkbox.isChecked())
+        # _analyze_selected_function 함수를 worker로 실행
+        worker = CancellableWorker(self._analyze_selected_function)
         self.current_worker = worker
         worker.signals.finished.connect(self.handle_analyze_selected_function_result)
         worker.signals.error.connect(self.handle_worker_error)
         self.threadpool.start(worker)
 
-    def handle_analyze_selected_function_result(self, review):
-        self.current_worker = None
+    def _analyze_selected_function(self, progress_callback, is_cancelled):
+        # 단일 함수 분석에 대한 처리
         selected_contracts = self.get_selected_contracts()
-        contract_name = selected_contracts[0] if selected_contracts else ""
+        contract_name = selected_contracts[0]
         function_name = self.function_select.currentText()
+        depth = self.spinbox_depth.value()
+        check_impact = self.impact_checkbox.isChecked()
+        
+        # 진행 상황 업데이트 (단일 작업이므로 1/1로 처리)
+        progress_callback(1, 1, f"Analyzing {contract_name}::{function_name}")
+        
+        # 분석 실행
+        review = self.client.analyze_and_review(contract_name, function_name, depth, check_impact=check_impact)
         if review:
-            self.result_text.setText(f"📑 Contract: {contract_name}, Function: {function_name}\n\n{review}")
+            report_path = save_review_report(contract_name, function_name, review, self.save_path)
+            if report_path:
+                print(f"✅ Report saved at: {report_path}")
         else:
-            self.result_text.setText("✅ No vulnerabilities found.")
+            review = "✅ No vulnerabilities found."
+        
+        return f"📑 Contract: {contract_name}, Function: {function_name}\n\n{review}"
+
+    def handle_analyze_selected_function_result(self, result_text):
+        self.current_worker = None
+        self.result_text.setText(result_text)
 
     def analyze_all_contracts(self):
         self.result_text.setText("🔍 Analyzing all contracts... Please wait.")
