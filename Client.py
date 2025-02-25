@@ -6,7 +6,7 @@ from utils import *
 class Client:
     def __init__(self):
         self.manager = ContractManager()
-        self.auditor = LLMAuditor()
+        self.auditor = LLMAuditor(model="Llama-3.3-70B-Instruct")
         self.tracer = Tracer(self.manager)
     
     def load_contracts(self, contract_paths):

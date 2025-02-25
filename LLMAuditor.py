@@ -4,7 +4,7 @@ import collections
 import re
 
 class LLMAuditor:
-    def __init__(self, api_ip="localhost", model="deepseek-r1-distill-qwen-32b",
+    def __init__(self, api_ip="localhost", model="DeepSeek-R1-Distill-Llama-70B",
                  max_tokens=50000, temperature=0.8, top_p=0.5, num_samples=5):
         self.api_url = f"http://{api_ip}:1234/v1/completions"
         self.model = model
@@ -95,7 +95,7 @@ class LLMAuditor:
     def _parse_keywords(self, results):
         """Function, Code Line(s), Keywords를 여러 개 처리하여 리스트로 반환"""
         # 각 "Result:" 블록을 분리하여 처리
-        result_blocks = re.split(r"\n\nResult:", results)[1:]  # 첫 번째 요소는 공백이므로 무시
+        result_blocks = re.split(r"\nResult:", results)[1:]  # 첫 번째 요소는 공백이므로 무시
         
         parsed_results = []
         
@@ -106,7 +106,8 @@ class LLMAuditor:
             # Function, Code Line(s), Keywords를 추출
             function_match = re.search(r"Function:\s*(.*?)\n", block)
             code_lines_match = re.search(r"Code Line\(s\):\s*(.*?)(\n|$)", block)  # 수정된 정규표현식
-            keywords_match = re.search(r"Keywords:\s*(.*?)(?=\nResult:|$)", block, flags=re.DOTALL)
+            # keywords_match = re.search(r"Keywords:\s*(.*?)(?=\nResult:|$)", block, flags=re.DOTALL)
+            keywords_match = re.search(r"Keywords:\s*\[(.*?)\]", block, flags=re.DOTALL)
             
             function_name = function_match.group(1).strip() if function_match else ""
             line_numbers = code_lines_match.group(1).strip() if code_lines_match else ""
