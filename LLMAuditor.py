@@ -2,9 +2,10 @@ import requests
 import json
 import collections
 import re
+from reportvectordb import ReportVectorDB
 
 class LLMAuditor:
-    def __init__(self, api_ip="localhost", model="DeepSeek-R1-Distill-Llama-70B",
+    def __init__(self, api_ip="localhost", model="DeepSeek-R1-Distill-Llama-32B",
                  max_tokens=50000, temperature=0.8, top_p=0.5, num_samples=5):
         self.api_url = f"http://{api_ip}:1234/v1/completions"
         self.model = model
@@ -18,6 +19,8 @@ class LLMAuditor:
                 "content": "You are a senior smart contract security auditor with extensive experience in Code4rena contest audits. Do not analyze Reentrancy, Race Conditions, or Integer Overflow/Underflow."
             }
         ]
+        self.vector_db = ReportVectorDB(reports_dir="reports", chunk_size=5000)
+        # self.vector_db.store_to_vector_db()
 
     def set_api_ip(self, api_ip):
         self.api_url = f"http://{api_ip}:1234/v1/completions"
@@ -121,11 +124,18 @@ class LLMAuditor:
     
     
     def decision_prompt(self, contracts): 
+        query_text = contracts
+
+        grouped_resuts = self.vector_db.query(query_text, n_results=3)
+        reference_data = self.vector_db.structure_to_string(grouped_resuts)
+
         cot_prompt = f"""
 You are a senior smart contract security auditor with extensive experience in Code4rena contest audits.
 Your task is to analyze the following Solidity smart contracts and identify vulnerabilities that are realistically exploitable (Medium or High risk). Do NOT report theoretical or highly improbable issues.
 
 ---
+### **Reference Data from Past Audits**
+{reference_data}
 
 ### **Chain-of-Thought Approach**
 Follow this structured approach to ensure comprehensive analysis. **Note: Do NOT consider or report any vulnerabilities related to Reentrancy, Race Conditions, or Integer Overflow/Underflow at any stage of the analysis.**
@@ -270,7 +280,8 @@ Result: Secure
         """ 리뷰 프롬프트 생성 """
 
         formatted_contracts = self.formatting_datas(contracts, impacted_functions)
-
+        grouped_resuts = self.vector_db.query(formatted_contracts, n_results=3)
+        reference_data = self.vector_db.structure_to_string(grouped_resuts)
         _review_prompt = f"""
 You are a **senior smart contract security reviewer**. Your task is to **verify the vulnerabilities identified by the initial security audit (Auditor)** and determine whether they are **valid**. Your analysis should go beyond theoretical concerns and focus on **realistic exploitability, access control, and system impact**.
 
@@ -394,7 +405,7 @@ Ensure that your final report is **accurate and based on real security risks**.
                 "top_p": self.top_p,
                 "stop": None
             }
-            response = requests.post(self.api_url, json=payload, timeout=60*10)
+            response = requests.post(self.api_url, json=payload)
             response.raise_for_status()
             result = response.json()["choices"][0]["text"].strip()
 
