@@ -204,6 +204,9 @@ Result: Secure
 
 ---
 
+####  Reference data that is similar to the contract code
+{reference_data}
+
 ### **Smart Contracts to Audit:**
 {contracts}
 """
@@ -326,7 +329,10 @@ Your role as a **security reviewer** is to re-assess the reported vulnerabilitie
 ### 3. Smart Contract for Review
 Below is the smart contract code that must be reviewed:
 
+####  Reference data that is similar to the contract code
+{reference_data}
 
+#### Target Contracts for Review
 ```solidity
 {formatted_contracts}
 ```
