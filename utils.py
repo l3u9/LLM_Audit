@@ -45,6 +45,13 @@ def initial_separate(contract_code):
     functions.append(function)
 
     global_value = extract_structs_and_variables(functions[0])
+    
+    for i in range(1, len(functions)):
+        if not global_value:
+            global_value = extract_structs_and_variables(functions[i])
+        else:
+            break
+
     contract_name = get_contract_name(functions[0])[-1]
     if contract_name == "UnknownContract":
         for function in functions:
