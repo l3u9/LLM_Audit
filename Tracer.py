@@ -8,14 +8,14 @@ class Tracer:
         self.contract_manager = contract_manager
 
     def _remove_duplicate_values(self, dict1, dict2):
-        # dict1의 값 중 dict2에도 있는 값 제거
+
         for key in dict1:
             dict1[key] = [value for value in dict1[key] if value not in dict2[key]]
         return dict1
     
 
     def _remove_duplicates_from_list(self, seq):
-        """순서를 유지하며 리스트 내 중복 항목 제거 (해시 불가능한 항목도 처리)"""
+
         new_list = []
         for item in seq:
             if item not in new_list:
@@ -23,10 +23,8 @@ class Tracer:
         return new_list
 
     def _remove_dup(self, dict_data):
-        """
-        주어진 딕셔너리(dict_data)의 각 key에 해당하는 리스트에서
-        중복된 항목을 제거하여 반환합니다.
-        """
+
+
         for key in dict_data:
             dict_data[key] = self._remove_duplicates_from_list(dict_data[key])
         return dict_data
@@ -99,9 +97,6 @@ class Tracer:
 
         contracts_and_functions = OrderedDict()
 
-
-        contracts_and_functions[contract_name] = [function_name]
-
         if internal_calls:
             for calls in internal_calls:
                 for function_name in calls:
@@ -149,23 +144,17 @@ class Tracer:
 
         _modifiers = self._get_traced_contract_modifiers(contracts_and_functions)
 
-        first_key = next(iter(contracts_and_functions))  # OrderedDict의 첫 번째 키 가져오기
-
-        # 첫 번째 키의 리스트에서 첫 번째 값 pop
-        if contracts_and_functions[first_key]:  # 리스트가 비어있지 않은 경우만 pop 수행
-            contracts_and_functions[first_key].pop(0)
-
         return _code_dict, contracts_and_functions, _modified_state_vars, _modifiers
 
 
 
     def trace_function_with_depth(self, contract_name, function_name, depth=3):
         datas, dicts, modifieds, modifiers = self.trace_function(contract_name, function_name)
+        modifieds = self._remove_dup(modifieds)
 
-
+        print("modifieds: ", modifieds)
         impacted_functions = OrderedDict()
         _impacted = self.contract_manager.get_impacted_modified_state_vars(modifieds)
-
         impacted_functions.update(_impacted)
         temp = deepcopy(dicts)
 
@@ -218,11 +207,12 @@ class Tracer:
 
         impacted_functions = self._remove_duplicate_values(impacted_functions, datas)
         datas = self._remove_dup(datas)
+        modifieds = self._remove_dup(modifieds)
         return datas, modifieds, modifier_codes, impacted_functions
 
 
 if __name__ == "__main__":
-    contract_paths = ["KeeperProxy.sol", "GmxProxy.sol", "PerpetualVault.sol", "VaultReader.sol"]
+    contract_paths = ["test.sol"]
     contract_manager = ContractManager()
     contract_manager.initial_save(contract_paths)
     contract_manager.load_contracts_info()
@@ -232,7 +222,7 @@ if __name__ == "__main__":
     # print(tracer.trace_function("LiquidRon", "redelegateAmount"))
     # datas, dicts = (tracer.trace_function("LiquidRon", "harvest"))
 
-    datas, modifieds, modifier_code, impacted_functions = tracer.trace_function_with_depth("PerpetualVault", "run", 3)
+    datas, modifieds, modifier_code, impacted_functions = tracer.trace_function_with_depth("SimpleERC20Token", "transferFrom", 3)
 
     print("Code")
     for data in datas:
