@@ -143,7 +143,6 @@ class Tracer:
         _code_dict = self._get_traced_contract_codes(contracts_and_functions)
 
         _modified_state_vars = self._get_traced_contract_modified_state_vars(contracts_and_functions)
-
         _modifiers = self._get_traced_contract_modifiers(contracts_and_functions)
 
         first_key = next(iter(contracts_and_functions))
@@ -214,7 +213,7 @@ class Tracer:
             modifier_codes[modifier] = modifier_code
 
         impacted_functions = self._remove_duplicate_values(impacted_functions, datas)
-
+        datas = self._remove_dup(datas)
         return datas, modifieds, modifier_codes, impacted_functions
 
 
