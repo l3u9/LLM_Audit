@@ -1,5 +1,6 @@
 from utils import *
 import os
+from pprint import pprint
 
 class ContractManager:
     def __init__(self):
@@ -19,17 +20,12 @@ class ContractManager:
 
     def load_contracts_info(self):
         for contract_name in self.contract_names:
-
-
             self.contracts_info[contract_name] = load_from_json(contract_name)
     
     def get_contract_names(self):
         return self.contract_names
     
     def get_contract_info(self, contract_name):
-
-
-
         return self.contracts_info.get(contract_name, None)
 
     def _select_contract_function(self, contract_name, function_name):
@@ -107,7 +103,6 @@ class ContractManager:
         functions = self._select_contract_function(contract_name, function_name)
         if not functions:
             return None
-        
 
         modified_state_vars = []
         for function in functions:
@@ -173,17 +168,17 @@ class ContractManager:
         return modifier_code
 
 
-    def get_impacted_modified_state_vars(self, state_vars):
+    def get_impacted_modified_state_vars(self, contract_and_state_vars: dict):
         # find all contract function that impacted by modified state_vars
 
         impacted_modified_state_vars = {}
 
-        for contract_name in state_vars:
+        for contract_name in contract_and_state_vars:
             contract_info = self.get_contract_info(contract_name)
             if not contract_info:
                 continue
 
-            for state_var in state_vars[contract_name]:
+            for state_var in contract_and_state_vars[contract_name]:
                 for function in contract_info["Functions"]:
                     if state_var in function["Modified State Variables"]:
                         if contract_name not in impacted_modified_state_vars:
@@ -195,32 +190,20 @@ class ContractManager:
 
 
 if __name__ == "__main__":
-    contract_paths = ["LiquidRon.sol", "RonHelper.sol", "LiquidProxy.sol", "ValidatorTracker.sol", "Escrow.sol"]
+    contract_paths = ["test.sol"]
     contract_manager = ContractManager()
     contract_manager.initial_save(contract_paths)
     contract_manager.load_contracts_info()
 
     # 특정 함수 코드 가져오기 예제
-    contract_name = "LiquidRon"
-    function_name = "harvest"
+    contract_name = "SimpleERC20Token"
+    function_name = "transferFrom"
     function_codes = contract_manager.get_function_code(contract_name, function_name)
 
     function_dependencies = contract_manager.get_functions_dependencies(contract_name, function_name)
-
     internal_calls = contract_manager.get_functions_internal_calls(contract_name, function_name)
     external_calls = contract_manager.get_functions_external_calls(contract_name, function_name)
     view_pure_calls = contract_manager.get_functions_view_pure_calls(contract_name, function_name)
     modified_state_vars = contract_manager.get_functions_modified_state_vars(contract_name, function_name)
 
-    impacted_function = contract_manager.get_impacted_modified_state_vars(modified_state_vars)
-
-    
-
-    for impacted in impacted_function:
-        print(impacted[0])
-        print(impacted[1])
-        print("\n")
-
-
-        
 

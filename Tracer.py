@@ -53,7 +53,6 @@ class Tracer:
             function_name = dicts[contract_name]
             for function in function_name:
                 modified_state_vars = self.contract_manager.get_functions_modified_state_vars(contract_name, function)
-
                 if contract_name not in contract_modified_state_vars:
                     contract_modified_state_vars[contract_name] = []
                 
@@ -96,6 +95,9 @@ class Tracer:
         # contract_names = self.contract_manager.get_contract_names()
 
         contracts_and_functions = OrderedDict()
+
+
+        contracts_and_functions[contract_name] = [function_name]
 
         if internal_calls:
             for calls in internal_calls:
@@ -144,7 +146,13 @@ class Tracer:
 
         _modifiers = self._get_traced_contract_modifiers(contracts_and_functions)
 
+        first_key = next(iter(contracts_and_functions))
+
+        if contracts_and_functions[first_key]:
+            contracts_and_functions[first_key].pop(0)
+
         return _code_dict, contracts_and_functions, _modified_state_vars, _modifiers
+
 
 
 
