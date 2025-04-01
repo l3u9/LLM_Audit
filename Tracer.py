@@ -206,8 +206,7 @@ class Tracer:
             modifier_codes[modifier] = modifier_code
 
         impacted_functions = self._remove_duplicate_values(impacted_functions, datas)
-        datas = self._remove_dup(datas)
-        modifieds = self._remove_dup(modifieds)
+
         return datas, modifieds, modifier_codes, impacted_functions
 
 
