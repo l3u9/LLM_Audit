@@ -93,7 +93,6 @@ def parse_function_calls(function_code, global_elements):
     internal_regex = r'\b(_[a-zA-Z0-9_]+)\s*\('
     interface_regex = r'\b([A-Za-z0-9_]+)(?:\([^)]*\))?\s*\.\s*([a-zA-Z0-9_]+)\s*\('
     view_pure_regex = r'\b([a-zA-Z0-9_]+)\s*\('
-    function_def_regex = r'^\s*function\s+([a-zA-Z0-9_]+)\s*\('
 
     # Solidity reserved keywords and special functions
     solidity_keywords = {
